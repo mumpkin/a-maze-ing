@@ -1,4 +1,4 @@
-import src
+from src import utils
 
-if __name__ == '__main__':
-    print(src.load_config())
+if __name__ == "__main__":
+    print(utils.load_config())
