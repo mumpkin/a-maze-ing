@@ -222,3 +222,6 @@ pyrightconfig.json
 
 ### autoPush
 auto_push.sh
+
+### virtual environnement
+pyenv
