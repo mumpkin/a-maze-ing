@@ -219,3 +219,6 @@ pyrightconfig.json
 # Ignore all local history of files
 .history
 .ionide
+
+### autoPush
+auto_push.sh
