@@ -1,7 +1,11 @@
 from typing import Any
+import sys
 
 
 def decrypt_config_line(file: Any) -> list[Any]:
+    """
+
+    """
     line = file.readline()
     config_values = list()
     try:
@@ -14,9 +18,17 @@ def decrypt_config_line(file: Any) -> list[Any]:
 
 
 def load_config() -> dict[str, Any]:
+    """
+    Parses the configuration file
+    Returns a dict with every value and their respective keys
+    """
     configs = dict()
+    repo_rootpath = ''
+    prefix_parts = sys.prefix.split('/')
+    for i in range(len(prefix_parts) - 1):
+        repo_rootpath += prefix_parts[i] + "/"
     try:
-        with open("./config.txt", 'r') as file:
+        with open(f"{repo_rootpath}config.txt", 'r') as file:
             config_values = decrypt_config_line(file)
             while len(config_values) == 2:
                 configs.update({config_values[0]: config_values[1]})
