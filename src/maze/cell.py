@@ -21,6 +21,7 @@ class Cell:
 
         return self._neighbours
 
+
     def set_neighbours(self, grid: list[Self]) -> None:
         """Set the list of direct neighbours of this cell."""
 
