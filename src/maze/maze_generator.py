@@ -2,7 +2,6 @@ from typing import Any
 from abc import ABC, abstractmethod
 
 
-
 class MazeGenerator(ABC):
     def __init__(self, config: dict[str, Any]) -> None:
         self._config = config
@@ -21,7 +20,7 @@ class MazeGenerator(ABC):
     def write_output(self) -> None:
         """
         Writes the maze output into the filename
-        Specified in the configuration file 
+        Specified in the configuration file
         """
         try:
             pass
