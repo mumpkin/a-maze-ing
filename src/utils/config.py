@@ -79,8 +79,10 @@ def _get_config_data(file: TextIOWrapper) -> dict[ConfigKey, Any]:
 
 def load_config(path: str) -> dict[ConfigKey, Any]:
     """
-    Parses the configuration file
-    Returns a dict with every value and their respective keys
+    Return the configuation.
+
+    Keyword arguments:
+    path: str -- Path to the config file.
     """
     file = open(path, "r")
     config = _get_config_data(file)
