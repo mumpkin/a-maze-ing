@@ -22,8 +22,8 @@ jobs:
 
       - name: Lint
         run: |
-            flake8 .
+            poetry run flake8 .
 
       - name: Types
         run: |
-            mypy --strict .
+            poetry run mypy --strict .
