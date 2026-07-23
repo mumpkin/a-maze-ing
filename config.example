@@ -3,4 +3,5 @@ HEIGHT=15				#Maze height
 ENTRY=0,0				#Entry coordinates (x,y)
 EXIT=19,14				#Exit coordinates (x,y)
 OUTPUT_FILE=maze.txt	#Output filename
-PERFECT=True			#Is the maze perfect?
+PERFECT=false			#Is the maze perfect?
+SEED=None               #Is the maze mazed?
