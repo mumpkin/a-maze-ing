@@ -1,4 +1,4 @@
-from .load_config import load_config
+from .config import config
+from .point import Point
 
-
-__all__ = ['load_config']
+__all__ = ["config", "Point"]
