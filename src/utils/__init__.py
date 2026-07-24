@@ -1,6 +1,6 @@
 """Module that contains util functions."""
 
-from .config import config
+from .config import configs
 from .point import Point
 
-__all__ = ["config", "Point"]
+__all__ = ["configs", "Point"]

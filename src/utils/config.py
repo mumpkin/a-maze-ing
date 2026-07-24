@@ -1,4 +1,6 @@
-import sys
+"""Module containing functions to parse configuration file."""
+
+# import sys
 from io import TextIOWrapper
 from typing import Any
 
@@ -6,7 +8,7 @@ from enums import ConfigKey
 
 from .point import Point
 
-config: dict[ConfigKey, Any] = dict()
+configs: dict[ConfigKey, Any] = dict()
 
 
 def _get_config_line(line: str) -> tuple[ConfigKey, Any]:
@@ -90,8 +92,8 @@ def load_config(path: str) -> dict[ConfigKey, Any]:
     return config
 
 
-try:
-    config = load_config(sys.argv[1])
-except Exception as err:
-    print(err, file=sys.stderr)
-    sys.exit(1)
+# try:
+#    config = load_config(sys.argv[1])
+#   except Exception as err:
+#    print(err, file=sys.stderr)
+#    sys.exit(1)
