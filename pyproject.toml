@@ -34,3 +34,6 @@ ignore = ["C901"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.ruff.format]
+quote-style = "double"
