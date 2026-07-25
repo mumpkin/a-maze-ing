@@ -1,7 +1,11 @@
+"""."""
+
 from enum import Enum
 
 
 class ConfigKey(str, Enum):
+    """."""
+
     WIDTH = "width"
     HEIGHT = "height"
     ENTRY = "entry"
