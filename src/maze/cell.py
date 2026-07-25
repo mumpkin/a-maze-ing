@@ -1,7 +1,11 @@
+"""."""
+
 from typing import Self
 
 
 class Point:
+    """."""
+
     def __init__(self, x: int, y: int) -> None:
         self.x: int = x
         self.y: int = y
@@ -17,13 +21,11 @@ class Cell:
         self._connections: list[Self] = []
 
     def get_neighbours(self) -> list[Self]:
-        """Return direct cell neighbours list."""
-
+        """Return the direct cell neighbours list."""
         return self._neighbours
 
     def set_neighbours(self, grid: list[Self]) -> None:
         """Set the list of direct neighbours of this cell."""
-
         width: int = max(grid, key=lambda c: c.pos.x).pos.x
         height: int = max(grid, key=lambda c: c.pos.y).pos.y
 
@@ -33,16 +35,14 @@ class Cell:
 
     def get_connections(self) -> list[Self]:
         """Return the list of cells connected to this one."""
-
         return self._connections
 
     def connect_to(self, cell: Self) -> None:
         """Add the given cell to the list of connected cells."""
-
         self._connections.append(cell)
 
     def is_neighbour(self, cell: Self, width: int, height: int) -> bool:
-        """Check if the"""
+        """Check the neighbourhood."""
         if (
             cell.pos.x < 0
             or cell.pos.y < 0

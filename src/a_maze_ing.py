@@ -1,4 +1,7 @@
-import utils
+"""AMAAAAZIIIIIING !!!!."""
+
+from globals import config
 
 if __name__ == "__main__":
-    print(utils.config)
+    """Main."""
+    print(config)
