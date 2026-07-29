@@ -6,4 +6,6 @@ from . import MazeGenerator
 class PerfectMazeGenerator(MazeGenerator):
     """."""
 
-    pass
+    def generate_maze(self) -> None:
+        """"."""
+        ...
