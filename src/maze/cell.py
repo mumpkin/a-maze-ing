@@ -75,9 +75,14 @@ class Cell:
         if relative_pos:
             self._neighbours[relative_pos] = neighbouring_cell
 
-    def get_connections(self) -> dict[Compass, bool]:
-        """Return the list of cells connected to this one."""
-        return self._connections
+    def get_connections(self) -> int:
+        """Return the value of cells connected to this one."""
+        # return self._connections
+        val: int = 0
+        for k, v in self._connections.items():
+            if v is True:
+                val += int(k.value)
+        return val
 
     def set_connection(self, pos: Compass) -> None:
         """Add the given cell to the list of connected cells."""
@@ -85,8 +90,6 @@ class Cell:
 
     def hexa_compass(self) -> int:
         """."""
-        decimal_value = sum([n.value for n in self._connections.keys()])
-        return int(
-            str(decimal_value),
-            base=16,
-        )
+        # decimal_value = sum([n.value for n in self._connections.keys()])
+        decimal_value: int = self.get_connections()
+        return int(decimal_value)
