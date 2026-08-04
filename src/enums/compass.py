@@ -6,7 +6,7 @@ from enum import Enum
 class Compass(Enum):
     """Compass enum to represent cardinal direction."""
 
-    NORTH = 8
-    EAST = 4
-    SOUTH = 2
-    WEST = 1
+    NORTH = 1
+    EAST = 2
+    SOUTH = 4
+    WEST = 8

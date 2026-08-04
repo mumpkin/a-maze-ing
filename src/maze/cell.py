@@ -1,5 +1,6 @@
 """."""
 
+import json
 import random
 from typing import Optional, Self
 
@@ -27,6 +28,9 @@ class Cell:
             Compass.WEST: False,
         }
 
+    def toJSON(self) -> str:
+        return json.dumps({**self.pos.__dict__, "state": self.state.value})
+
     def _validate_neighbouring(
         self, neighbouring_cell: Self
     ) -> Compass | None:
@@ -34,14 +38,14 @@ class Cell:
         diff_x = self.pos.x - neighbouring_cell.pos.x
         diff_y = self.pos.y - neighbouring_cell.pos.y
         if diff_x == 0:
-            if diff_y == 1 and self.pos.y < config.height:
+            if diff_y == 1:
                 return Compass.NORTH
-            if diff_y == -1 and self.pos.y > 0:
+            if diff_y == -1:
                 return Compass.SOUTH
         if diff_y == 0:
-            if diff_x == 1 and self.pos.x < config.width:
+            if diff_x == 1:
                 return Compass.EAST
-            if diff_x == -1 and self.pos.x > 0:
+            if diff_x == -1:
                 return Compass.WEST
         return None
 

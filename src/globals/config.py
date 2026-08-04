@@ -3,7 +3,7 @@
 import os
 import sys
 from enum import Enum
-from typing import Optional, Self
+from typing import Any, Optional, Self
 
 import dotenv
 from pydantic import BaseModel, Field
@@ -33,6 +33,17 @@ class Config(BaseModel):
     output_file: str
     perfect: bool = Field(default=True)
     seed: Optional[int] = Field(default=None)
+
+    def toJSON(self) -> dict[str, Any]:
+        return {
+            "width": self.width,
+            "height": self.height,
+            "entry": self.entry.__dict__,
+            "exit": self.exit.__dict__,
+            "output_file": self.output_file,
+            "perfect": self.perfect,
+            "seed": self.seed,
+        }
 
     @staticmethod
     def get_env() -> dict[ConfigOption, str]:
