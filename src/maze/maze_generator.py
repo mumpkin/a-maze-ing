@@ -1,8 +1,6 @@
 """."""
 
-import json
-import math
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any
 
 from enums import CellState
@@ -41,7 +39,6 @@ class MazeGenerator(ABC):
 
     def _ft_lock(self) -> None:
         """."""
-
         if config.width >= 9 and config.height >= 7:
             center: Point = Point(x=config.width // 2, y=config.height // 2)
             ft_pos = [
@@ -62,10 +59,6 @@ class MazeGenerator(ABC):
                         and cell.pos.y == from_center.y
                     ):
                         cell.state = CellState.LOCKED
-        for index, cell in enumerate(self.grid):
-            if index % config.width == 0:
-                print("\n", end="")
-            print("██" if cell.state != CellState.LOCKED else "  ", end="")
 
     def _init_grid(self) -> None:
         """."""
