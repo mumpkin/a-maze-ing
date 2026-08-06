@@ -81,10 +81,9 @@ class Cell:
         """Add the given cell to the list of connected cells."""
         self._connections[pos] = True
 
-    def hexa_compass(self) -> int:
+    def hexa_compass(self) -> str:
         """Return the hexadecimal value related to the cell connections."""
-        decimal_value = sum([n.value for n in self._connections.keys()])
-        return int(
-            str(decimal_value),
-            base=16,
+        decimal_value = sum(
+            [k.value for k, v in self._connections.items() if v]
         )
+        return hex(decimal_value).removeprefix("0x").upper()
