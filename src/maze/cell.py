@@ -41,14 +41,14 @@ class Cell:
         diff_x = self.pos.x - cell.pos.x
         diff_y = self.pos.y - cell.pos.y
         if diff_x == 0:
-            if diff_y == 1:
-                return Compass.NORTH
             if diff_y == -1:
+                return Compass.NORTH
+            if diff_y == 1:
                 return Compass.SOUTH
         if diff_y == 0:
-            if diff_x == 1:
-                return Compass.EAST
             if diff_x == -1:
+                return Compass.EAST
+            if diff_x == 1:
                 return Compass.WEST
         return None
 
