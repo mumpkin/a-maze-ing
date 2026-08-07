@@ -1,11 +1,11 @@
 """MazeGenerator definition."""
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Optional
 
 import globals
 from enums import CellState
-from utils import Point
+from utils import Point, RenderEngine
 
 from .cell import Cell
 
@@ -84,7 +84,7 @@ class MazeGenerator(ABC):
         except Exception as fe:
             print(fe)
 
-    # @abstractmethod
-    # def generate(self, renderer: Optional[RenderEngine] = None) -> None:
-    #     """Generate the maze."""
-    #     pass
+    @abstractmethod
+    def generate(self, renderer: Optional[RenderEngine] = None) -> None:
+        """Generate the maze."""
+        pass
