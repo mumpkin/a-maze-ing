@@ -1,9 +1,10 @@
 """Load and validate the global config."""
 
+import json
 import os
 import sys
 from enum import Enum
-from typing import Any, Optional, Self
+from typing import Optional, Self
 
 import dotenv
 from pydantic import BaseModel, Field
@@ -34,16 +35,20 @@ class Config(BaseModel):
     perfect: bool = Field(default=True)
     seed: Optional[int] = Field(default=None)
 
-    def toJSON(self) -> dict[str, Any]:
-        return {
-            "width": self.width,
-            "height": self.height,
-            "entry": self.entry.__dict__,
-            "exit": self.exit.__dict__,
-            "output_file": self.output_file,
-            "perfect": self.perfect,
-            "seed": self.seed,
-        }
+    def toJSON(self) -> str:
+        """Return the json representation of Config."""
+        return json.dumps(
+            {
+                "width": self.width,
+                "height": self.height,
+                "entry": self.entry.__dict__,
+                "exit": self.exit.__dict__,
+                "output_file": self.output_file,
+                "perfect": self.perfect,
+                "seed": self.seed,
+            },
+            indent=4,
+        )
 
     @staticmethod
     def get_env() -> dict[ConfigOption, str]:
