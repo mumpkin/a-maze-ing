@@ -1,6 +1,7 @@
 """MazeGenerator definition."""
 
 from abc import ABC, abstractmethod
+from typing import Callable, Optional
 
 from enums import CellState
 from globals import config
@@ -65,11 +66,6 @@ class MazeGenerator(ABC):
         self._ft_lock()
         pass
 
-    @abstractmethod
-    def generate(self) -> None:
-        """Generate the maze."""
-        pass
-
     def write_output(self) -> None:
         """Write the maze output into the filename."""
         try:
@@ -85,3 +81,8 @@ class MazeGenerator(ABC):
                     )
         except Exception as fe:
             print(fe)
+
+    @abstractmethod
+    def generate(self, renderer: Optional[Callable]) -> None:
+        """Generate the maze."""
+        pass
