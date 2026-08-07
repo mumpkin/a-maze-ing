@@ -1,10 +1,10 @@
-"""."""
+"""ConfigKey enum."""
 
 from enum import Enum
 
 
 class ConfigKey(str, Enum):
-    """."""
+    """Mandatory options of config file."""
 
     WIDTH = "width"
     HEIGHT = "height"

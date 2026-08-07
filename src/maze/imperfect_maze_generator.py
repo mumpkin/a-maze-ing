@@ -1,4 +1,4 @@
-"""."""
+"""ImperfectMazeGenerator definition."""
 
 from . import MazeGenerator
 

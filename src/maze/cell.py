@@ -1,11 +1,10 @@
-"""."""
+"""Cell definition."""
 
 import json
 import random
 from typing import Optional, Self
 
 from enums import CellState, Compass
-from globals import config
 from utils import Point
 
 
@@ -29,14 +28,18 @@ class Cell:
         }
 
     def toJSON(self) -> str:
+        """."""
         return json.dumps({**self.pos.__dict__, "state": self.state.value})
 
-    def _validate_neighbouring(
-        self, neighbouring_cell: Self
-    ) -> Compass | None:
-        """Return a Compass direction if neighbouring_cell is."""
-        diff_x = self.pos.x - neighbouring_cell.pos.x
-        diff_y = self.pos.y - neighbouring_cell.pos.y
+    def _validate_neighbouring(self, cell: Self) -> Compass | None:
+        """
+        Return a Compass direction if neighbouring_cell is.
+
+        Keyword parameter:
+        cell: Cell -- Cell to validate and to get compass direction.
+        """
+        diff_x = self.pos.x - cell.pos.x
+        diff_y = self.pos.y - cell.pos.y
         if diff_x == 0:
             if diff_y == 1:
                 return Compass.NORTH
@@ -49,7 +52,7 @@ class Cell:
                 return Compass.WEST
         return None
 
-    def get_random_neighbour(self) -> Optional[tuple[Compass, Self]]:
+    def get_random_idle_neighbour(self) -> Optional[tuple[Compass, Self]]:
         """Return an idle cell that neighbouring the current cell."""
         idle_neighbours = [
             n
@@ -67,21 +70,31 @@ class Cell:
         """Return the direct cell neighbours list."""
         return self._neighbours
 
-    def set_neighbours(self, neighbouring_cell: Self) -> None:
-        """Set the list of direct neighbours of this cell."""
-        relative_pos = self._validate_neighbouring(neighbouring_cell)
-        if relative_pos:
-            self._neighbours[relative_pos] = neighbouring_cell
+    def add_neighbour(self, cell: Self) -> None:
+        """
+        Add a new valid cell as self neighbour.
+
+        Keyword parameters:
+        cell: Cell -- Cell to add as neighbour if its position is valid.
+        """
+        compass_dir = self._validate_neighbouring(cell)
+        if compass_dir:
+            self._neighbours[compass_dir] = cell
 
     def get_connections(self) -> dict[Compass, bool]:
         """Return the list of cells connected to this one."""
         return self._connections
 
-    def set_connection(self, pos: Compass) -> None:
-        """Add the given cell to the list of connected cells."""
-        self._connections[pos] = True
+    def set_connection(self, dir: Compass) -> None:
+        """
+        Add the given cell to the list of connected cells.
 
-    def hexa_compass(self) -> str:
+        Keyword parameters:
+        dir: Compass -- Compass direction to set to `True`.
+        """
+        self._connections[dir] = True
+
+    def conns_to_hexa(self) -> str:
         """Return the hexadecimal value related to the cell connections."""
         decimal_value = sum(
             [k.value for k, v in self._connections.items() if v]
