@@ -23,11 +23,11 @@ class Point:
         """Return the `Point` instance with attributes set to 0."""
         return cls(0, 0)
 
-    def __add__(self, value: Point) -> Point:
+    def __add__(self, value: "Point") -> "Point":
         """Return self+value."""
         return Point(x=self.x + value.x, y=self.y + value.y)
 
-    def translate(self, point: Point) -> None:
+    def translate(self, point: "Point") -> None:
         """
         Do a point translation.
 
@@ -37,7 +37,7 @@ class Point:
         self.x += point.x
         self.y += point.y
 
-    def __mul__(self, value: int) -> Point:
+    def __mul__(self, value: int) -> "Point":
         """Return self*value."""
         return Point(x=self.x * value, y=self.y * value)
 
@@ -51,7 +51,7 @@ class Point:
         self.x *= factor
         self.y *= factor
 
-    def distance(self, point: Point) -> int:
+    def distance(self, point: "Point") -> int:
         """
         Return the distance between self and a point.
 
