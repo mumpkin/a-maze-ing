@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Optional
 
+import globals
 from enums import CellState
-from globals import config
 from utils import Point
 
 from .cell import Cell
@@ -15,31 +15,33 @@ class MazeGenerator(ABC):
 
     def __init__(self) -> None:
         """MazeGenerator default constructor."""
-        self.grid: list[Cell] = []
-        self._init_grid()
+        self.maze: list[Cell] = []
+        self._init_maze()
 
     def _instanciate_cells(self) -> None:
-        """Instancate cells in self maze grid."""
-        for i in range(config.width * config.height):
-            self.grid.append(
+        """Instancate cells in self maze."""
+        for i in range(globals.config.width * globals.config.height):
+            self.maze.append(
                 Cell(
                     Point(
-                        x=i % config.width,
-                        y=i // config.width,
+                        x=i % globals.config.width,
+                        y=i // globals.config.width,
                     )
                 )
             )
 
     def _define_neighbourhood(self) -> None:
         """Set cells neighbours."""
-        for cell in self.grid:
-            for neighbour in self.grid:
+        for cell in self.maze:
+            for neighbour in self.maze:
                 cell.add_neighbour(neighbour)
 
     def _ft_lock(self) -> None:
         """Set cells state to LOCK to draw 42 symbol."""
-        if config.width >= 9 and config.height >= 7:
-            center: Point = Point(x=config.width // 2, y=config.height // 2)
+        if globals.config.width >= 9 and globals.config.height >= 7:
+            center: Point = Point(
+                x=globals.config.width // 2, y=globals.config.height // 2
+            )
             ft_pos = [
                 *[Point(x=-3, y=a) for a in range(-2, 1)],
                 Point(x=-2, y=0),
@@ -51,7 +53,7 @@ class MazeGenerator(ABC):
                 *[Point(x=a, y=2) for a in range(1, 4)],
             ]
             for locker in ft_pos:
-                for cell in self.grid:
+                for cell in self.maze:
                     from_center = locker + center
                     if (
                         cell.pos.x == from_center.x
@@ -59,8 +61,8 @@ class MazeGenerator(ABC):
                     ):
                         cell.state = CellState.LOCKED
 
-    def _init_grid(self) -> None:
-        """Initialize default grid to prepare maze generation."""
+    def _init_maze(self) -> None:
+        """Initialize default maze to prepare generation."""
         self._instanciate_cells()
         self._define_neighbourhood()
         self._ft_lock()
@@ -69,10 +71,10 @@ class MazeGenerator(ABC):
     def write_output(self) -> None:
         """Write the maze output into the filename."""
         try:
-            with open(config.output_file, "w") as file:
-                for i in range(config.height):
+            with open(globals.config.output_file, "w") as file:
+                for i in range(globals.config.height):
                     line: list[Cell] = sorted(
-                        [cell for cell in self.grid if cell.pos.y == i],
+                        [cell for cell in self.maze if cell.pos.y == i],
                         key=lambda cell: cell.pos.x,
                     )
                     print(
@@ -82,7 +84,7 @@ class MazeGenerator(ABC):
         except Exception as fe:
             print(fe)
 
-    @abstractmethod
-    def generate(self, renderer: Optional[Callable]) -> None:
-        """Generate the maze."""
-        pass
+    # @abstractmethod
+    # def generate(self, renderer: Optional[RenderEngine] = None) -> None:
+    #     """Generate the maze."""
+    #     pass

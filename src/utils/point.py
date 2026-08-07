@@ -27,6 +27,16 @@ class Point:
         """Return self+value."""
         return Point(x=self.x + value.x, y=self.y + value.y)
 
+    def __mul__(self, value: int) -> "Point":
+        """Return self*value."""
+        return Point(x=self.x * value, y=self.y * value)
+
+    def __eq__(self, value: object) -> bool:
+        """Return self==value."""
+        if not isinstance(value, Point):
+            return NotImplemented
+        return self.x == value.x and self.y == value.y
+
     def translate(self, point: "Point") -> None:
         """
         Do a point translation.
@@ -36,10 +46,6 @@ class Point:
         """
         self.x += point.x
         self.y += point.y
-
-    def __mul__(self, value: int) -> "Point":
-        """Return self*value."""
-        return Point(x=self.x * value, y=self.y * value)
 
     def scale(self, factor: int) -> None:
         """
