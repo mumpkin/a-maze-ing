@@ -1,4 +1,4 @@
-"""Cell Module for neighbours handling."""
+"""Compass enum."""
 
 from enum import Enum
 

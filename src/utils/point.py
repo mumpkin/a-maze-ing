@@ -23,26 +23,41 @@ class Point:
         """Return the `Point` instance with attributes set to 0."""
         return cls(0, 0)
 
-    def __add__(self, point: Point) -> Point:
-        """."""
-        return Point(x=self.x + point.x, y=self.y + point.y)
+    def __add__(self, value: Point) -> Point:
+        """Return self+value."""
+        return Point(x=self.x + value.x, y=self.y + value.y)
 
-    def add(self, point: Point) -> None:
-        """."""
+    def translate(self, point: Point) -> None:
+        """
+        Do a point translation.
+
+        Keyword parameters:
+        point: Point -- Point that contains translation values.
+        """
         self.x += point.x
         self.y += point.y
 
     def __mul__(self, value: int) -> Point:
-        """."""
+        """Return self*value."""
         return Point(x=self.x * value, y=self.y * value)
 
-    def scale(self, nb: int) -> None:
-        """."""
-        self.x *= nb
-        self.y *= nb
+    def scale(self, factor: int) -> None:
+        """
+        Do an uniform scaling by multiplying the point by the scale factor.
 
-    def distance_to(self, point: Point) -> int:
-        """."""
+        Keyword parameters:
+        factor: int -- Scale factor.
+        """
+        self.x *= factor
+        self.y *= factor
+
+    def distance(self, point: Point) -> int:
+        """
+        Return the distance between self and a point.
+
+        Keyword parameters:
+        point: Point -- Point to get distance to.
+        """
         return int(
             math.sqrt((point.x - self.x) ** 2 + (point.y - self.y) ** 2)
         )
