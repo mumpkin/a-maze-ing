@@ -86,6 +86,6 @@ class MazeGenerator(ABC):
             print(fe)
 
     @abstractmethod
-    def generate(self, renderer: Optional[RenderEngine] = None) -> None:
+    def generate(self, engine: Optional[RenderEngine] = None) -> None:
         """Generate the maze."""
         pass
