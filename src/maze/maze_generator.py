@@ -15,13 +15,14 @@ class MazeGenerator(ABC):
 
     def __init__(self) -> None:
         """MazeGenerator default constructor."""
-        self.maze: list[Cell] = []
+        self.grid: list[Cell] = []
+        self.optimal_path: list[Cell] = []
         self._init_maze()
 
     def _instanciate_cells(self) -> None:
         """Instancate cells in self maze."""
         for i in range(globals.config.width * globals.config.height):
-            self.maze.append(
+            self.grid.append(
                 Cell(
                     Point(
                         x=i % globals.config.width,
@@ -32,8 +33,8 @@ class MazeGenerator(ABC):
 
     def _define_neighbourhood(self) -> None:
         """Set cells neighbours."""
-        for cell in self.maze:
-            for neighbour in self.maze:
+        for cell in self.grid:
+            for neighbour in self.grid:
                 cell.add_neighbour(neighbour)
 
     def _ft_lock(self) -> None:
@@ -53,7 +54,7 @@ class MazeGenerator(ABC):
                 *[Point(x=a, y=2) for a in range(1, 4)],
             ]
             for locker in ft_pos:
-                for cell in self.maze:
+                for cell in self.grid:
                     from_center = locker + center
                     if (
                         cell.pos.x == from_center.x
@@ -74,7 +75,7 @@ class MazeGenerator(ABC):
             with open(globals.config.output_file, "w") as file:
                 for i in range(globals.config.height):
                     line: list[Cell] = sorted(
-                        [cell for cell in self.maze if cell.pos.y == i],
+                        [cell for cell in self.grid if cell.pos.y == i],
                         key=lambda cell: cell.pos.x,
                     )
                     print(
