@@ -12,4 +12,5 @@ class TileColor(str, Enum):
     IDLE = "\033[100m"
     LOCKED = "\033[106m"
     VISITED = "\033[107m"
-    OPTIMAL_PATH = "\033[105m"
+    VISITING = "\033[105m"
+    OPTIMAL_PATH = "\033[43m"

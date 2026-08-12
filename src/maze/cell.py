@@ -52,19 +52,13 @@ class Cell:
                 return Compass.WEST
         return None
 
-    def get_random_idle_neighbour(self) -> Optional[tuple[Compass, Self]]:
+    def get_random_neighbour(self) -> tuple[Compass, Self]:
         """Return an idle cell that neighbouring the current cell."""
-        idle_neighbours = [
-            n
-            for n in self._neighbours.items()
-            if n[1] is not None and n[1].state == CellState.IDLE
+        neighbours: list[tuple[Compass, Self]] = [
+            (c, n) for c, n in self._neighbours.items() if n is not None
         ]
-        if len(idle_neighbours) == 0:
-            return None
-        compass_dir, neighbour = random.choice(idle_neighbours)
-        while not neighbour or neighbour.state != "idle":
-            compass_dir, neighbour = random.choice(idle_neighbours)
-        return (compass_dir, neighbour)
+
+        return random.choice(neighbours)
 
     def get_neighbours(self) -> dict[Compass, Optional[Self]]:
         """Return the direct cell neighbours list."""
