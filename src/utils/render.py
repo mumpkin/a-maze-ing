@@ -36,6 +36,8 @@ class RenderEngine:
                 return TileColor.IDLE
             case CellState.VISITED:
                 return TileColor.VISITED
+            case CellState.VISITING:
+                return TileColor.VISITING
 
     def _draw_tile(self, color: Optional[TileColor] = None) -> None:
         """

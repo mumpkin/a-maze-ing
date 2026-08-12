@@ -8,4 +8,5 @@ class CellState(str, Enum):
 
     IDLE = "idle"
     VISITED = "visited"
+    VISITING = "visiting"
     LOCKED = "locked"
