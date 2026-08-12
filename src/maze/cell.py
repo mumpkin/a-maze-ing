@@ -53,7 +53,7 @@ class Cell:
         return None
 
     def get_random_neighbour(self) -> tuple[Compass, Self]:
-        """Return an idle cell that neighbouring the current cell."""
+        """Return a cell that neighbouring the current cell."""
         neighbours: list[tuple[Compass, Self]] = [
             (c, n) for c, n in self._neighbours.items() if n is not None
         ]
