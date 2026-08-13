@@ -5,7 +5,7 @@ from typing import Optional
 
 import globals
 from enums import CellState
-from utils import Point, RenderEngine
+from utils import Point
 
 from .cell import Cell
 
@@ -67,7 +67,6 @@ class MazeGenerator(ABC):
         self._instanciate_cells()
         self._define_neighbourhood()
         self._ft_lock()
-        pass
 
     def write_output(self) -> None:
         """Write the maze output into the filename."""
@@ -86,6 +85,6 @@ class MazeGenerator(ABC):
             print(fe)
 
     @abstractmethod
-    def generate(self, engine: Optional[RenderEngine] = None) -> None:
+    def generate(self, engine: Optional["RenderEngine"] = None) -> None:
         """Generate the maze."""
         pass
