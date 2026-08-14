@@ -86,7 +86,17 @@ class Cell:
         Keyword parameters:
         dir: Compass -- Compass direction to set to `True`.
         """
-        self._connections[dir] = True
+        if self._neighbours[dir]:
+            self._connections[dir] = True
+
+    def unset_connection(self, dir: Compass) -> None:
+        """
+        Remove the connection to the given direction.
+
+        Keyword parameters:
+        dir: Compass -- Compass direction to set to `True`.
+        """
+        self._connections[dir] = False
 
     def conns_to_hexa(self) -> str:
         """Return the hexadecimal value related to the cell connections."""
