@@ -58,13 +58,27 @@ class RenderEngine:
         self._draw_tile()
         if row:
             for cell in row:
-                south_neighbour = cell.get_neighbours().get(Compass.SOUTH)
+                north_neighbour = cell.get_neighbours().get(Compass.NORTH)
                 if (
                     cell.state == CellState.LOCKED
-                    and south_neighbour
-                    and south_neighbour.state == CellState.LOCKED
-                ) or cell.get_connections()[Compass.SOUTH]:
+                    and north_neighbour
+                    and north_neighbour.state == CellState.LOCKED
+                ):
                     self._draw_tile(self._get_tile_color(cell))
+                elif (
+                    cell.state == CellState.VISITED
+                    and north_neighbour
+                    and north_neighbour.state == CellState.VISITED
+                    and cell.get_connections()[Compass.NORTH]
+                ):
+                    if (
+                        cell.pos == globals.config.entry
+                        or cell.pos == globals.config.exit
+                    ):
+                        self._draw_tile(TileColor.VISITED)
+                    else:
+                        self._draw_tile(self._get_tile_color(cell))
+
                 else:
                     self._draw_tile()
                 self._draw_tile()
@@ -89,8 +103,22 @@ class RenderEngine:
                 cell.state == CellState.LOCKED
                 and east_neighbour
                 and east_neighbour.state == CellState.LOCKED
-            ) or cell.get_connections()[Compass.EAST]:
+            ):
                 self._draw_tile(self._get_tile_color(cell))
+            elif (
+                cell.state == CellState.VISITED
+                and east_neighbour
+                and east_neighbour.state == CellState.VISITED
+                and cell.get_connections()[Compass.EAST]
+            ):
+                if (
+                    cell.pos == globals.config.entry
+                    or cell.pos == globals.config.exit
+                ):
+                    self._draw_tile(TileColor.VISITED)
+                else:
+                    self._draw_tile(self._get_tile_color(cell))
+
             else:
                 self._draw_tile()
         self._draw_eol()
