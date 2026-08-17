@@ -85,15 +85,19 @@ class Cell:
         """Return the list of cells connected to this one."""
         return self._connections
 
-    def set_connection(self, dir: Compass) -> None:
+    def set_connection(self, direction: Compass) -> None:
         """
-        Add the given cell to the list of connected cells.
+        Connect the given cell to the cell in the specified direction.
 
         Keyword parameters:
         dir: Compass -- Compass direction to set to `True`.
         """
-        if self._neighbours[dir]:
-            self._connections[dir] = True
+        neighbour = self._neighbours[direction]
+        if neighbour and neighbour.state != CellState.LOCKED:
+            self._connections[direction] = True
+            for dir, val in neighbour._neighbours.items():
+                if val == self:
+                    neighbour._connections[dir] = True
 
     def unset_connection(self, dir: Compass) -> None:
         """
@@ -103,6 +107,16 @@ class Cell:
         dir: Compass -- Compass direction to set to `True`.
         """
         self._connections[dir] = False
+        neighbour = self._neighbours[dir]
+        if neighbour:
+            for dir, val in neighbour._neighbours.items():
+                if val == self:
+                    neighbour._connections[dir] = False
+
+    def unset_all_connections(self) -> None:
+        """Remove all connections linked to the current cell in both ways."""
+        for c in [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]:
+            self.unset_connection(c)
 
     def conns_to_hexa(self) -> str:
         """Return the hexadecimal value related to the cell connections."""
