@@ -22,14 +22,12 @@ class ImperfectMazeGenerator(MazeGenerator):
         neighbour = cell.get_neighbours()[direction]
         print(cell.get_neighbours())
         if neighbour:
-            print("neighbour:  " + neighbour.state)
             while neighbour and neighbour.state == CellState.IDLE:
                 neighbour.state = CellState.VISITED
                 cell_list.append(neighbour)
                 if neighbour.get_neighbours()[direction]:
                     neighbour.set_connection(direction)
                     neighbour = neighbour.get_neighbours()[direction]
-                print("List:", [cp.pos for cp in cell_list])
             choice(cell_list).state = CellState.IDLE
 
     def _build_row(
@@ -43,7 +41,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         cells_list: list[Cell] = [cell]
         self._directional_dig(cell, cells_list, Compass.EAST)
         self._directional_dig(cell, cells_list, Compass.WEST)
-        print("List:", [cp.pos for cp in cells_list])
         # if len(cells_list) > 1:
         #     next_pair = sample(cells_list, k=2)
         #     self._build_row(
@@ -64,7 +61,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         cells_list: list[Cell] = [cell]
         self._directional_dig(cell, cells_list, Compass.SOUTH)
         self._directional_dig(cell, cells_list, Compass.NORTH)
-        print("List:", [cp.pos for cp in cells_list])
         if len(cells_list) > 1:
             next_pair = sample(cells_list, k=2)
             self._build_row(
@@ -77,16 +73,12 @@ class ImperfectMazeGenerator(MazeGenerator):
     def generate(self, engine: Optional[RenderEngine] = None) -> None:
         """."""
         for cell in self.grid:
-            print(cell.state)
             if cell.state != CellState.LOCKED:
                 cell.state = CellState.VISITED
-                cell.get_connections()[Compass.NORTH]
-                cell.get_connections()[Compass.EAST]
-                cell.get_connections()[Compass.SOUTH]
-                cell.get_connections()[Compass.WEST]
-                print()
-                print(cell.get_connections())
-                print(cell.get_neighbours())
+                cell.set_connection(Compass.NORTH)
+                cell.set_connection(Compass.EAST)
+                cell.set_connection(Compass.SOUTH)
+                cell.set_connection(Compass.WEST)
         # if randint(0, 1) == 0:
         #    self._build_row(self.grid[randint(0, globals.config.width)])
         # else:
