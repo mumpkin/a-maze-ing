@@ -1,7 +1,5 @@
 """Render definition."""
 
-import subprocess
-
 import globals
 import maze
 from enums import CellState, Compass, TileColor
@@ -13,7 +11,7 @@ class RenderEngine:
 
     def __init__(self, maze: maze.MazeGenerator) -> None:
         """Render default constructor."""
-        self.maze: maze.MazeGenerator = maze
+        self.maze = maze
 
     def _get_tile_color(self, cell: Cell) -> TileColor:
         """
@@ -70,9 +68,15 @@ class RenderEngine:
                 ):
                     self._draw_tile(self._get_tile_color(cell))
                 elif (
-                    cell.state == CellState.VISITED
+                    (
+                        cell.state == CellState.VISITED
+                        or cell.state == CellState.VISITING
+                    )
                     and north_neighbour
-                    and north_neighbour.state == CellState.VISITED
+                    and (
+                        north_neighbour.state == CellState.VISITED
+                        or north_neighbour.state == CellState.VISITING
+                    )
                     and cell.get_connections()[Compass.NORTH]
                 ):
                     if (
@@ -110,9 +114,15 @@ class RenderEngine:
             ):
                 self._draw_tile(self._get_tile_color(cell))
             elif (
-                cell.state == CellState.VISITED
+                (
+                    cell.state == CellState.VISITED
+                    or cell.state == CellState.VISITING
+                )
                 and east_neighbour
-                and east_neighbour.state == CellState.VISITED
+                and (
+                    east_neighbour.state == CellState.VISITED
+                    or east_neighbour.state == CellState.VISITING
+                )
                 and cell.get_connections()[Compass.EAST]
             ):
                 if (
@@ -129,7 +139,6 @@ class RenderEngine:
 
     def render(self) -> None:
         """Render the maze."""
-        _ = subprocess.run(["clear", "-x"])
         row = []
         for y in range(globals.config.height):
             row = [cell for cell in self.maze.grid if cell.pos.y == y]
