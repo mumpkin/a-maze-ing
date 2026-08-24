@@ -1,8 +1,8 @@
 """AMAAAAZIIIIIING !!!!."""
 
 import json
-from random import seed
 
+# from random import seed
 from globals import config
 from maze.imperfect_maze_generator import ImperfectMazeGenerator
 
