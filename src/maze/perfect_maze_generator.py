@@ -1,6 +1,8 @@
 """PerfectMazeGenerator definition."""
 
 import random
+import subprocess
+from sys import stdout
 from time import sleep
 from typing import override
 
@@ -16,6 +18,7 @@ class PerfectMazeGenerator(MazeGenerator):
     """Perfect maze generator."""
 
     def _is_maze_generated(self) -> bool:
+        """Check if the maze is completely generated."""
         for cell in self.grid:
             match cell.state:
                 case CellState.VISITED | CellState.LOCKED:
@@ -24,28 +27,30 @@ class PerfectMazeGenerator(MazeGenerator):
                     return False
         return True
 
-    def _connect_visiting(self, visiting: list[Cell]):
+    def _connect_visiting(self, visiting: list[Cell]) -> None:
+        """
+        Connect all visiting cell together.
+
+        Keyword parameters:
+        visitings: list[Cell] -- Cells that search the next visited cell.
+        """
         for index, cell in enumerate(visiting[:-1]):
             for dir, neig in cell.get_neighbours().items():
                 if visiting[index + 1] == neig:
                     match dir:
                         case Compass.NORTH:
                             cell.set_connection(Compass.NORTH)
-                            visiting[index + 1].set_connection(Compass.SOUTH)
                         case Compass.EAST:
                             cell.set_connection(Compass.EAST)
-                            visiting[index + 1].set_connection(Compass.WEST)
                         case Compass.SOUTH:
                             cell.set_connection(Compass.SOUTH)
-                            visiting[index + 1].set_connection(Compass.NORTH)
                         case Compass.WEST:
                             cell.set_connection(Compass.WEST)
-                            visiting[index + 1].set_connection(Compass.EAST)
 
     @override
     def generate(self, engine: utils.RenderEngine | None = None) -> None:
-        """Generate maze."""
-
+        """Generate the maze."""
+        _ = subprocess.run(["clear"])
         visiting: list[Cell] = [
             cell for cell in self.grid if cell.pos == globals.config.entry
         ]
@@ -64,13 +69,15 @@ class PerfectMazeGenerator(MazeGenerator):
                         ]
                     )
                 )
-            next_cell: Cell = visiting[-1].get_random_neighbour()[1]
+            next_dir, next_cell = visiting[-1].get_random_neighbour()
             if next_cell in visiting:
                 while not visiting[-1] == next_cell:
                     visiting[-1].state = CellState.IDLE
+                    visiting[-1].unset_all_connections()
                     _ = visiting.pop()
             elif next_cell.state == CellState.IDLE:
                 next_cell.state = CellState.VISITING
+                visiting[-1].set_connection(next_dir)
                 visiting.append(next_cell)
             elif next_cell.state == CellState.VISITED:
                 visiting.append(next_cell)
@@ -79,5 +86,7 @@ class PerfectMazeGenerator(MazeGenerator):
                     cell.state = CellState.VISITED
                     visiting = []
             if engine is not None:
+                _ = stdout.write("\033[H")
+                _ = stdout.flush()
                 engine.render()
-            sleep(0.05)
+                sleep(0.01)
