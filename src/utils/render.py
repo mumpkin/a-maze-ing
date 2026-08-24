@@ -3,16 +3,17 @@
 import subprocess
 
 import globals
+import maze
 from enums import CellState, Compass, TileColor
-from maze import Cell, MazeGenerator
+from maze import Cell
 
 
 class RenderEngine:
     """Engine to render da maze."""
 
-    def __init__(self, maze: MazeGenerator) -> None:
+    def __init__(self, maze: maze.MazeGenerator) -> None:
         """Render default constructor."""
-        self.maze: MazeGenerator = maze
+        self.maze: maze.MazeGenerator = maze
 
     def _get_tile_color(self, cell: Cell) -> TileColor:
         """
