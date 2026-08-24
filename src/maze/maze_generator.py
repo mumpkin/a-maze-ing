@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import globals
+import utils
 from enums import CellState
 from utils import Point
 
@@ -85,6 +86,6 @@ class MazeGenerator(ABC):
             print(fe)
 
     @abstractmethod
-    def generate(self, engine: Optional["RenderEngine"] = None) -> None:
+    def generate(self, engine: Optional[utils.RenderEngine] = None) -> None:
         """Generate the maze."""
         pass
