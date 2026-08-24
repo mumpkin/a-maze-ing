@@ -3,6 +3,8 @@
 from random import choice, randint, sample
 from typing import Optional
 
+from typing_extensions import override
+
 import globals
 from enums import CellState, Compass
 from utils import RenderEngine
@@ -14,24 +16,53 @@ from .cell import Cell
 class ImperfectMazeGenerator(MazeGenerator):
     """Imperfect maze generator class."""
 
+    def _select_direction(self, cell: Cell, direction: Compass) -> Compass:
+        if direction == Compass.EAST or direction == Compass.WEST:
+            north_neighbour = cell.get_neighbours()[Compass.NORTH]
+            if north_neighbour and north_neighbour.conns_to_hexa() == "5":
+                return Compass.SOUTH
+            else:
+                return Compass.NORTH
+        elif direction == Compass.NORTH or direction == Compass.SOUTH:
+            east_neighbour = cell.get_neighbours()[Compass.EAST]
+            if east_neighbour and east_neighbour.conns_to_hexa() == "5":
+                return Compass.WEST
+            else:
+                return Compass.EAST
+
     def _directional_dig(
         self, cell: Cell, cell_list: list[Cell], direction: Compass
     ) -> bool:
         print()
-        if cell.state == CellState.IDLE:
-            cell.state = CellState.VISITED
-        else:
+        if (
+            direction == Compass.NORTH or direction == Compass.SOUTH
+        ) and cell.get_connections()[Compass.EAST] is False:
             return False
+        elif (
+            direction == Compass.EAST or direction == Compass.WEST
+        ) and cell.get_connections()[Compass.SOUTH] is False:
+            return False
+
+        to_unset = self._select_direction(cell, direction)
+        # to_unset = Compass.EAST
+        if to_unset is None:
+            return False
+
+        print(f"cell: {cell.pos} with connections:\n{cell.get_neighbours()}")
+        print()
+        if to_unset and cell.get_neighbours()[to_unset] is False:
+            return False
+
+        cell.unset_connection(to_unset)
         neighbour = cell.get_neighbours()[direction]
-        print(cell.get_neighbours())
-        if neighbour:
-            while neighbour and neighbour.state == CellState.IDLE:
-                neighbour.state = CellState.VISITED
-                cell_list.append(neighbour)
-                if neighbour.get_neighbours()[direction]:
-                    neighbour.set_connection(direction)
-                    neighbour = neighbour.get_neighbours()[direction]
-            choice(cell_list).state = CellState.IDLE
+
+        while neighbour and neighbour.state == CellState.VISITED:
+            cell_list.append(neighbour)
+            neighbour.unset_connection(to_unset)
+            neighbour = neighbour.get_neighbours()[direction]
+
+        for cell in sample(cell_list, k=max(0, len(cell_list) // 4)):
+            cell.set_connection(to_unset)
         return True
 
     def _build_row(
@@ -39,41 +70,39 @@ class ImperfectMazeGenerator(MazeGenerator):
     ) -> None:
         if not cell:
             return
-        if cell.state == CellState.VISITED:
+        if cell.state == CellState.IDLE:
             return
 
         cells_list: list[Cell] = [cell]
-        self._directional_dig(cell, cells_list, Compass.EAST)
-        self._directional_dig(cell, cells_list, Compass.WEST)
+        if self._directional_dig(cell, cells_list, Compass.EAST) is False:
+            print("Bad???")
+            _ = self._directional_dig(cell, cells_list, Compass.WEST)
+        if engine:
+            engine.render()
         # if len(cells_list) > 1:
-        #     next_pair = sample(cells_list, k=2)
-        #     self._build_row(
-        #         next_pair[0].get_neighbours()[Compass.NORTH], engine
-        #     )
-        #     self._build_row(
-        #         next_pair[1].get_neighbours()[Compass.SOUTH], engine
-        #     )
+        #     col_pair = sample(cells_list, k=2)
+        #     self._build_col(col_pair[0].get_neighbours()[Compass.EAST], engine)
+        #     self._build_col(col_pair[1].get_neighbours()[Compass.WEST], engine)
 
-    def _build_collumn(
+    def _build_col(
         self, cell: Optional[Cell], engine: Optional[RenderEngine] = None
     ) -> None:
         if not cell:
             return
-        if cell.state == CellState.VISITED:
+        if cell.state == CellState.IDLE:
             return
 
         cells_list: list[Cell] = [cell]
-        if not self._directional_dig(cell, cells_list, Compass.SOUTH):
-            self._directional_dig(cell, cells_list, Compass.NORTH)
+        if self._directional_dig(cell, cells_list, Compass.SOUTH) is False:
+            _ = self._directional_dig(cell, cells_list, Compass.NORTH)
+        if engine:
+            engine.render()
         if len(cells_list) > 1:
-            next_pair = sample(cells_list, k=2)
-            self._build_row(
-                next_pair[0].get_neighbours()[Compass.EAST], engine
-            )
-            self._build_row(
-                next_pair[1].get_neighbours()[Compass.WEST], engine
-            )
+            row_pair = sample(cells_list, k=2)
+            # self._build_row(row_pair[0].get_neighbours()[Compass.EAST], engine)
+            self._build_row(row_pair[1].get_neighbours()[Compass.WEST], engine)
 
+    @override
     def generate(self, engine: Optional[RenderEngine] = None) -> None:
         """."""
         for cell in self.grid:
@@ -92,4 +121,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         #            * (globals.config.width + 1)
         #        ]
         #    )
-        self._build_collumn(self.grid[randint(0, globals.config.width - 1)])
+        self._build_col(self.grid[randint(0, globals.config.width - 1)])
+        if engine:
+            engine.render()
