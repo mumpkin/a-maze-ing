@@ -1,7 +1,6 @@
 """Render definition."""
 
 import subprocess
-from typing import Optional
 
 import globals
 from enums import CellState, Compass, TileColor
@@ -27,6 +26,8 @@ class RenderEngine:
                 return TileColor.ENTRY
             case globals.config.exit:
                 return TileColor.EXIT
+            case _:
+                pass
         if cell in self.maze.optimal_path:
             return TileColor.OPTIMAL_PATH
         match cell.state:
@@ -39,7 +40,7 @@ class RenderEngine:
             case CellState.VISITING:
                 return TileColor.VISITING
 
-    def _draw_tile(self, color: Optional[TileColor] = None) -> None:
+    def _draw_tile(self, color: TileColor | None = None) -> None:
         """
         Draw the tile.
 
@@ -56,7 +57,7 @@ class RenderEngine:
         """Draw the end of line."""
         print(TileColor.TRANSPARENT.value)
 
-    def _draw_wall_row(self, row: Optional[list[Cell]] = None) -> None:
+    def _draw_wall_row(self, row: list[Cell] | None = None) -> None:
         self._draw_tile()
         if row:
             for cell in row:
@@ -127,7 +128,7 @@ class RenderEngine:
 
     def render(self) -> None:
         """Render the maze."""
-        subprocess.run(["clear", "-x"])
+        _ = subprocess.run(["clear", "-x"])
         row = []
         for y in range(globals.config.height):
             row = [cell for cell in self.maze.grid if cell.pos.y == y]
