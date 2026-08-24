@@ -1,7 +1,7 @@
 """PerfectMazeGenerator definition."""
 
 import random
-from typing import Optional
+from typing import override
 
 from enums.cell_state import CellState
 from maze import Cell
@@ -19,7 +19,8 @@ class PerfectMazeGenerator(MazeGenerator):
                 return False
         return True
 
-    def generate(self, engine: Optional[RenderEngine] = None) -> None:
+    @override
+    def generate(self, engine: RenderEngine | None = None) -> None:
         """Generate maze."""
         visiting: list[Cell] = []
         while self._is_maze_generated():

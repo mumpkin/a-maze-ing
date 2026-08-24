@@ -1,7 +1,6 @@
 """MazeGenerator definition."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import globals
 import utils
@@ -86,6 +85,6 @@ class MazeGenerator(ABC):
             print(fe)
 
     @abstractmethod
-    def generate(self, engine: Optional[utils.RenderEngine] = None) -> None:
+    def generate(self, engine: utils.RenderEngine | None = None) -> None:
         """Generate the maze."""
         pass

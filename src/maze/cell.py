@@ -2,7 +2,7 @@
 
 import json
 import random
-from typing import Optional, Self
+from typing import Self
 
 from enums import CellState, Compass
 from utils import Point
@@ -14,7 +14,7 @@ class Cell:
     def __init__(self, pos: Point) -> None:
         self.pos: Point = pos
         self.state: CellState = CellState.IDLE
-        self._neighbours: dict[Compass, Optional[Self]] = {
+        self._neighbours: dict[Compass, Self | None] = {
             Compass.NORTH: None,
             Compass.EAST: None,
             Compass.SOUTH: None,
@@ -60,7 +60,7 @@ class Cell:
 
         return random.choice(neighbours)
 
-    def get_neighbours(self) -> dict[Compass, Optional[Self]]:
+    def get_neighbours(self) -> dict[Compass, Self | None]:
         """Return the direct cell neighbours list."""
         return self._neighbours
 

@@ -4,7 +4,7 @@ import json
 import os
 import sys
 from enum import Enum
-from typing import Optional, Self
+from typing import Self
 
 import dotenv
 from pydantic import BaseModel, Field
@@ -33,7 +33,7 @@ class Config(BaseModel):
     exit: Point
     output_file: str
     perfect: bool = Field(default=True)
-    seed: Optional[int] = Field(default=None)
+    seed: int | None = Field(default=None)
 
     def toJSON(self) -> str:
         """Return the json representation of Config."""
@@ -57,7 +57,7 @@ class Config(BaseModel):
         missing_vars: list[str] = []
 
         for option in [o for o in ConfigOption]:
-            var: Optional[str] = os.getenv(option.value.upper())
+            var: str | None = os.getenv(option.value.upper())
             if not var:
                 missing_vars.append(option.value)
             else:
@@ -77,7 +77,7 @@ class Config(BaseModel):
         path: str -- Path to the config file.
         """
         try:
-            dotenv.load_dotenv(path)
+            _ = dotenv.load_dotenv(path)
             env = Config.get_env()
 
             config = cls(
