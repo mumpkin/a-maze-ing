@@ -1,8 +1,9 @@
 """ImperfectMazeGenerator definition."""
 
-from random import choice, sample
+from random import choice, randint, sample
 from typing import Optional
 
+import globals
 from enums import CellState, Compass
 from utils import RenderEngine
 
@@ -15,10 +16,12 @@ class ImperfectMazeGenerator(MazeGenerator):
 
     def _directional_dig(
         self, cell: Cell, cell_list: list[Cell], direction: Compass
-    ) -> None:
+    ) -> bool:
         print()
         if cell.state == CellState.IDLE:
             cell.state = CellState.VISITED
+        else:
+            return False
         neighbour = cell.get_neighbours()[direction]
         print(cell.get_neighbours())
         if neighbour:
@@ -29,6 +32,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                     neighbour.set_connection(direction)
                     neighbour = neighbour.get_neighbours()[direction]
             choice(cell_list).state = CellState.IDLE
+        return True
 
     def _build_row(
         self, cell: Optional[Cell], engine: Optional[RenderEngine] = None
@@ -59,8 +63,8 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
 
         cells_list: list[Cell] = [cell]
-        self._directional_dig(cell, cells_list, Compass.SOUTH)
-        self._directional_dig(cell, cells_list, Compass.NORTH)
+        if not self._directional_dig(cell, cells_list, Compass.SOUTH):
+            self._directional_dig(cell, cells_list, Compass.NORTH)
         if len(cells_list) > 1:
             next_pair = sample(cells_list, k=2)
             self._build_row(
@@ -88,4 +92,4 @@ class ImperfectMazeGenerator(MazeGenerator):
         #            * (globals.config.width + 1)
         #        ]
         #    )
-        # self._build_collumn(self.grid[randint(0, globals.config.width - 1)])
+        self._build_collumn(self.grid[randint(0, globals.config.width - 1)])
