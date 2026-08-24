@@ -2,7 +2,7 @@
 
 import math
 from dataclasses import dataclass
-from typing import Self
+from typing import Self, override
 
 
 @dataclass
@@ -31,6 +31,7 @@ class Point:
         """Return self*value."""
         return Point(x=self.x * value, y=self.y * value)
 
+    @override
     def __eq__(self, value: object) -> bool:
         """Return self==value."""
         if not isinstance(value, Point):
