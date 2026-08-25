@@ -1,11 +1,14 @@
-"""AMAAAAZIIIIIING !!!!."""
+"""A-MAZE-ING.
 
-from maze import PerfectMazeGenerator
-from utils import RenderEngine
+ _____     _____ _____ _____ _____     _____ _____ _____
+|  _  |___|     |  _  |__   |   __|___|     |   | |   __|
+|     |___| | | |     |   __|   __|___|-   -| | | |  |  |
+|__|__|   |_|_|_|__|__|_____|_____|   |_____|_|___|_____|
+"""
+
+from app import App
 
 if __name__ == "__main__":
-    """Main."""
-    maze = PerfectMazeGenerator()
-    engine = RenderEngine(maze)
-    maze.generate(engine)
-    maze.write_output()
+    """Run the app."""
+    app = App()
+    app.run()
