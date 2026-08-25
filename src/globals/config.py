@@ -7,7 +7,11 @@ from enum import Enum
 from typing import Self
 
 import dotenv
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field,
+    model_validator,
+)
 
 from utils import Point
 
@@ -68,6 +72,36 @@ class Config(BaseModel):
 
         return vars
 
+    @model_validator(mode="after")
+    def _check_entry(self) -> Self:
+        if self.entry.x not in range(self.width):
+            raise ValueError(
+                f"Entry X must be between 0 and {self.width}(excluded)."
+            )
+        if self.entry.y not in range(self.height):
+            raise ValueError(
+                f"Entry Y must be between 0 and {self.height}(excluded)."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_exit(self) -> Self:
+        if self.exit.x not in range(self.width):
+            raise ValueError(
+                f"Exit X must be between 0 and {self.width}(excluded)."
+            )
+        if self.exit.y not in range(self.height):
+            raise ValueError(
+                f"Exit Y must be between 0 and {self.height}(excluded)."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_entry_exit_not_eq(self) -> Self:
+        if self.entry == self.exit:
+            raise ValueError("Entry and Exit must not be equal.")
+        return self
+
     @classmethod
     def load_config(cls, path: str) -> Self:
         """
@@ -99,7 +133,7 @@ class Config(BaseModel):
             )
             return config
         except Exception as err:
-            print(f"Config error: {err}")
+            print(f"Config error: {err}", file=sys.stderr)
             sys.exit(1)
 
 
