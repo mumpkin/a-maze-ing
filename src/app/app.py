@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 from enum import Enum, auto
 
 import globals
@@ -37,7 +38,7 @@ class App:
                 case AppState.Generator:
                     pass
                 case AppState.Config:
-                    pass
+                    self._config()
 
     def _title(self):
         _ = subprocess.run("clear")
@@ -59,7 +60,7 @@ class App:
             "`--- ---'   `--- ---`--- ---`-------`-------'   `---`--- ---`-------'",  # noqa: E501
             "\033[0m",
         ]
-        options: list[str] = ["s - start", "c - show config", "q - quit"]
+        options: list[str] = ["s: start", "c: show config", "q: quit"]
         title_height: int = len(options) + len(heading)
         title_width: int = len(max(heading, key=len))
         if title_width >= term_width or title_height >= term_height:
@@ -84,6 +85,68 @@ class App:
             case "c":
                 _ = subprocess.run("clear")
                 self.state = AppState.Config
+            case "q":
+                _ = subprocess.run("clear")
+                exit(0)
+            case _:
+                pass
+
+    def _config(self):
+        _ = subprocess.run("clear")
+        print("\033[?25l", end="")
+        self._print_config()
+        self._route_config_action(self._get_user_input())
+
+    def _print_config(self):
+        """."""
+        term_width, term_height = os.get_terminal_size()
+        heading: list[str] = [
+            "\033[1m",
+            " _______ _______ ______  _______ ___ _______ ",
+            "|   _   |   _   |   _  \\|   _   |   |   _   |",
+            "|.  1___|.  |   |.  |   |.  1___|.  |.  |___|",
+            "|.  |___|.  |   |.  |   |.  __) |.  |.  |   |",
+            "|:  1   |:  1   |:  |   |:  |   |:  |:  1   |",
+            "|::.. . |::.. . |::.|   |::.|   |::.|::.. . |",
+            "`-------`-------`--- ---`---'   `---`-------'",
+            "\033[0m",
+        ]
+        configs: list[str] = [
+            f"- WIDTH: {globals.config.width}",
+            f"- HEIGHT: {globals.config.height}",
+            f"- ENTRY: {globals.config.entry.__dict__}",
+            f"- EXIT: {globals.config.exit.__dict__}",
+            f"- PERFECT: {globals.config.perfect}",
+            f"- SEED: {globals.config.seed}",
+            f"- OUTPUT FILE: {globals.config.output_file}",
+            f"- CONGIF FILE: {sys.argv[1]}",
+        ]
+        title_height: int = len(configs) + len(heading)
+        title_width: int = len(max(heading, key=len))
+        if title_width >= term_width or title_height >= term_height:
+            self._wait_term_size(title_width, title_height)
+            term_width, term_height = os.get_terminal_size()
+        option_width: int = len(max(configs, key=len))
+        fill_menu: str = "".join(
+            [" " for _ in range((term_width - option_width) // 2)]
+        )
+        for _ in range((term_height - len(heading) - len(configs)) // 2):
+            print()
+        for line in heading:
+            print(line.center(term_width))
+        for line in configs:
+            print(fill_menu + line)
+        print()
+        print("t: title screen - s: start - q: quit".center(term_width))
+
+    def _route_config_action(self, action: str):
+        match action.lower():
+            case "s":
+                _ = subprocess.run("clear")
+                self.state = AppState.Generator
+            case "t":
+                _ = subprocess.run("clear")
+                self.state = AppState.TitleScreen
             case "q":
                 _ = subprocess.run("clear")
                 exit(0)
