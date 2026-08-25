@@ -1,11 +1,13 @@
 """Render definition."""
 
+from typing import final
+
 import globals
 import maze
 from enums import CellState, Compass, TileColor
-from maze import Cell
 
 
+@final
 class RenderEngine:
     """Engine to render da maze."""
 
@@ -13,7 +15,7 @@ class RenderEngine:
         """Render default constructor."""
         self.maze = maze
 
-    def _get_tile_color(self, cell: Cell) -> TileColor:
+    def _get_tile_color(self, cell: maze.Cell) -> TileColor:
         """
         Get tile color according to a cell attributes.
 
@@ -56,7 +58,7 @@ class RenderEngine:
         """Draw the end of line."""
         print(TileColor.TRANSPARENT.value)
 
-    def _draw_wall_row(self, row: list[Cell] | None = None) -> None:
+    def _draw_wall_row(self, row: list[maze.Cell] | None = None) -> None:
         self._draw_tile()
         if row:
             for cell in row:
@@ -96,7 +98,7 @@ class RenderEngine:
                 self._draw_tile()
         self._draw_eol()
 
-    def _draw_cells_row(self, row: list[Cell]) -> None:
+    def _draw_cells_row(self, row: list[maze.Cell]) -> None:
         """
         Draw row of cells in the terminal.
 
