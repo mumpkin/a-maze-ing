@@ -1,7 +1,6 @@
 """ImperfectMazeGenerator definition."""
 
-from random import randint, sample
-from this import d
+from random import choice, randint, sample
 from typing import Optional
 
 from typing_extensions import override
@@ -84,14 +83,16 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
 
         if direction == Compass.SOUTH or direction == Compass.WEST:
-            cell.state = CellState.VISITING
             cell.unset_connection(to_unset)
         neighbour = cell.get_neighbours()[direction]
 
-        while neighbour and neighbour.state == CellState.VISITED:
+        while (
+            neighbour
+            and neighbour.state == CellState.VISITED
+            and neighbour.get_connections()[direction]
+        ):
             cell_list.append(neighbour)
             neighbour.unset_connection(to_unset)
-            neighbour.state = CellState.VISITING
             neighbour = neighbour.get_neighbours()[direction]
 
         for cell in sample(cell_list, k=1):
@@ -99,44 +100,45 @@ class ImperfectMazeGenerator(MazeGenerator):
 
     def _build_row(
         self,
-        cell: Optional[Cell],
+        cell: Cell,
         direction: Compass,
         engine: Optional[RenderEngine] = None,
     ) -> None:
-        if not cell:
-            return
-        if cell.state == CellState.IDLE:
-            return
+        # if cell.state == CellState.VISITED:
+        #     return
 
         cells_list: list[Cell] = [cell]
         print("Testing towards EAST")
         self._directional_dig(cell, cells_list, direction)
         if engine:
             engine.render()
-        # if len(cells_list) > 1:
-        #     col_pair = sample(cells_list, k=2)
-        # self._build_col(col_pair[0], Compass.EAST, engine)
-        # self._build_col(col_pair[1], Compass.WEST, engine)
+
+        li = list(filter(lambda x: x.pos.x % 2 == 0, cells_list))
+        print("Filter size:", li)
+        # for col in sample(li, k=len(li)):
+        #     side = choice([Compass.NORTH, Compass.SOUTH])
+        #     self._build_row(col, side, engine)
 
     def _build_col(
         self,
-        cell: Optional[Cell],
+        cell: Cell,
         direction: Compass,
         engine: Optional[RenderEngine] = None,
     ) -> None:
-        if not cell:
-            return
-        if cell.state == CellState.IDLE:
-            return
-
         cells_list: list[Cell] = [cell]
         self._directional_dig(cell, cells_list, direction)
         if engine:
             engine.render()
-        if len(cells_list) > 1:
-            row_pair = sample(cells_list, k=2)
-            self._build_row(row_pair[0], Compass.EAST, engine)
-            self._build_row(row_pair[1], Compass.WEST, engine)
+        li = list(filter(lambda x: x.pos.y % 2 == 0, cells_list))
+        print("Filter size:", li)
+        for row in sample(li, k=len(li)):
+            side = choice([Compass.EAST, Compass.WEST])
+            self._build_row(row, side, engine)
+
+    # ---IDEA---
+    # Should make a initial cut and the handle the separate spaces recursively with coordinates
+    # like top right/left and bottom right-left of the zone and then make the rows and collums
+    # while preventing the program from going further than those limits to avoid overwriting on previous cells
 
     @override
     def generate(self, engine: Optional[RenderEngine] = None) -> None:
