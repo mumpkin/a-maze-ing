@@ -89,4 +89,4 @@ class PerfectMazeGenerator(MazeGenerator):
                 _ = stdout.write("\033[H")
                 _ = stdout.flush()
                 engine.render()
-                sleep(0.01)
+                sleep(globals.config.delay)

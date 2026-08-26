@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-from enum import Enum
 from typing import Self
 
 import dotenv
@@ -13,19 +12,8 @@ from pydantic import (
     model_validator,
 )
 
+from enums import ConfigKey
 from utils import Point
-
-
-class ConfigOption(str, Enum):
-    """Available config options."""
-
-    WIDTH = "width"
-    HEIGHT = "height"
-    ENTRY = "entry"
-    EXIT = "exit"
-    OUTPUT_FILE = "output_file"
-    PERFECT = "perfect"
-    SEED = "seed"
 
 
 class Config(BaseModel):
@@ -38,6 +26,7 @@ class Config(BaseModel):
     output_file: str
     perfect: bool = Field(default=True)
     seed: int | None = Field(default=None)
+    delay: float = Field(gt=0)
 
     def toJSON(self) -> str:
         """Return the json representation of Config."""
@@ -55,12 +44,12 @@ class Config(BaseModel):
         )
 
     @staticmethod
-    def get_env() -> dict[ConfigOption, str]:
+    def get_env() -> dict[ConfigKey, str]:
         """Return the environment variables."""
-        vars: dict[ConfigOption, str] = {}
+        vars: dict[ConfigKey, str] = {}
         missing_vars: list[str] = []
 
-        for option in [o for o in ConfigOption]:
+        for option in [o for o in ConfigKey]:
             var: str | None = os.getenv(option.value.upper())
             if not var:
                 missing_vars.append(option.value)
@@ -115,21 +104,22 @@ class Config(BaseModel):
             env = Config.get_env()
 
             config = cls(
-                width=int(env[ConfigOption.WIDTH]),
-                height=int(env[ConfigOption.HEIGHT]),
+                width=int(env[ConfigKey.WIDTH]),
+                height=int(env[ConfigKey.HEIGHT]),
                 entry=Point(
-                    x=int(env[ConfigOption.ENTRY].split(",")[0]),
-                    y=int(env[ConfigOption.ENTRY].split(",")[1]),
+                    x=int(env[ConfigKey.ENTRY].split(",")[0]),
+                    y=int(env[ConfigKey.ENTRY].split(",")[1]),
                 ),
                 exit=Point(
-                    x=int(env[ConfigOption.EXIT].split(",")[0]),
-                    y=int(env[ConfigOption.EXIT].split(",")[1]),
+                    x=int(env[ConfigKey.EXIT].split(",")[0]),
+                    y=int(env[ConfigKey.EXIT].split(",")[1]),
                 ),
-                output_file=env[ConfigOption.OUTPUT_FILE],
-                perfect=env[ConfigOption.PERFECT].lower() == "true",
-                seed=int(env[ConfigOption.SEED])
-                if env[ConfigOption.SEED].isdigit()
+                output_file=env[ConfigKey.OUTPUT_FILE],
+                perfect=env[ConfigKey.PERFECT].lower() == "true",
+                seed=int(env[ConfigKey.SEED])
+                if env[ConfigKey.SEED].isdigit()
                 else None,
+                delay=float(env[ConfigKey.DELAY]),
             )
             return config
         except Exception as err:
