@@ -5,3 +5,4 @@ EXIT=9,9				#Exit coordinates (x,y)
 OUTPUT_FILE=maze.txt	#Output filename
 PERFECT=True			#Is the maze perfect?
 SEED=None               #Is the maze mazed?
+DELAY=0.001              #Set the delay of maze generations steps for vizualisation mode.

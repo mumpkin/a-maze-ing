@@ -149,6 +149,7 @@ class App:
             f"- EXIT: {globals.config.exit.__dict__}",
             f"- PERFECT: {globals.config.perfect}",
             f"- SEED: {globals.config.seed}",
+            f"- DELAY: {globals.config.delay}",
             f"- OUTPUT FILE: {globals.config.output_file}",
             f"- CONGIF FILE: {sys.argv[1]}",
         ]
@@ -163,7 +164,7 @@ class App:
         for line in configs:
             print(fill_menu + line)
         print()
-        print("t: title screen - s: start - q: quit".center(term_width))
+        print("t: title screen - q: quit".center(term_width))
 
     def _route_config_action(self, action: str) -> None:
         """

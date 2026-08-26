@@ -13,3 +13,4 @@ class ConfigKey(str, Enum):
     OUTPUT_FILE = "output_file"
     PERFECT = "perfect"
     SEED = "seed"
+    DELAY = "delay"
