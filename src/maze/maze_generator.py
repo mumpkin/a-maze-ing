@@ -17,7 +17,6 @@ class MazeGenerator(ABC):
         """MazeGenerator default constructor."""
         self.grid: list[Cell] = []
         self.optimal_path: list[Cell] = []
-        self._init_maze()
 
     def _instanciate_cells(self) -> None:
         """Instancate cells in self maze."""
@@ -62,8 +61,9 @@ class MazeGenerator(ABC):
                     ):
                         cell.state = CellState.LOCKED
 
-    def _init_maze(self) -> None:
+    def init_maze(self) -> None:
         """Initialize default maze to prepare generation."""
+        self.grid = []
         self._instanciate_cells()
         self._define_neighbourhood()
         self._ft_lock()

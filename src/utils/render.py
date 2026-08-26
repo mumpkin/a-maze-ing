@@ -14,7 +14,7 @@ class RenderEngine:
     def __init__(self, maze: maze.MazeGenerator) -> None:
         """Render default constructor."""
         self.maze = maze
-        self.color_scheme: ColorScheme = ColorScheme()
+        self._color_scheme: ColorScheme = ColorScheme()
 
     def _get_tile_color(self, cell: maze.Cell):
         """
@@ -25,22 +25,30 @@ class RenderEngine:
         """
         match cell.pos:
             case globals.config.entry:
-                return self.color_scheme.ENTRY
+                return self._color_scheme.ENTRY
             case globals.config.exit:
-                return self.color_scheme.EXIT
+                return self._color_scheme.EXIT
             case _:
                 pass
         if cell in self.maze.optimal_path:
-            return self.color_scheme.OPTIMAL_PATH
+            return self._color_scheme.OPTIMAL_PATH
         match cell.state:
             case CellState.LOCKED:
-                return self.color_scheme.LOCKED
+                return self._color_scheme.LOCKED
             case CellState.IDLE:
-                return self.color_scheme.IDLE
+                return self._color_scheme.IDLE
             case CellState.VISITED:
-                return self.color_scheme.VISITED
+                return self._color_scheme.VISITED
             case CellState.VISITING:
-                return self.color_scheme.VISITING
+                return self._color_scheme.VISITING
+
+    def set_color_scheme(self, color_scheme: ColorScheme) -> None:
+        """."""
+        self._color_scheme = color_scheme
+
+    def get_color_scheme(self) -> ColorScheme:
+        """."""
+        return self._color_scheme
 
     def _draw_tile(self, color: str | None = None) -> None:
         """
@@ -53,11 +61,11 @@ class RenderEngine:
         if color:
             print(color + tile, end="")
         else:
-            print(self.color_scheme.IDLE + tile, end="")
+            print(self._color_scheme.IDLE + tile, end="")
 
     def _draw_eol(self) -> None:
         """Draw the end of line."""
-        print(self.color_scheme.TRANSPARENT)
+        print(self._color_scheme.TRANSPARENT)
 
     def _draw_wall_row(self, row: list[maze.Cell] | None = None) -> None:
         self._draw_tile()
@@ -86,7 +94,7 @@ class RenderEngine:
                         cell.pos == globals.config.entry
                         or cell.pos == globals.config.exit
                     ):
-                        self._draw_tile(DefaultColorScheme.VISITED)
+                        self._draw_tile(self._color_scheme.VISITED)
                     else:
                         self._draw_tile(self._get_tile_color(cell))
 
@@ -132,7 +140,7 @@ class RenderEngine:
                     cell.pos == globals.config.entry
                     or cell.pos == globals.config.exit
                 ):
-                    self._draw_tile(DefaultColorScheme.VISITED)
+                    self._draw_tile(self._color_scheme.VISITED)
                 else:
                     self._draw_tile(self._get_tile_color(cell))
 
