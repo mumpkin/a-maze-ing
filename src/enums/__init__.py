@@ -1,7 +1,7 @@
 """Enums module."""
 
 from .cell_state import CellState
-from .color_scheme import ColorScheme, IceColorScheme
+from .color_scheme import ColorScheme, FiredColorScheme, IcedColorScheme
 from .compass import Compass
 from .config_keys import ConfigKey
 
@@ -10,5 +10,6 @@ __all__ = [
     "CellState",
     "Compass",
     "ColorScheme",
-    "IceColorScheme",
+    "IcedColorScheme",
+    "FiredColorScheme",
 ]
