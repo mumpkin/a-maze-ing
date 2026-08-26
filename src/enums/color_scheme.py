@@ -4,9 +4,9 @@ from typing_extensions import final
 
 
 class ColorScheme:
-    """."""
+    """Default color scheme."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name: str = "Default"
         self.TRANSPARENT: str = "\033[49m"
         self.ENTRY: str = "\033[102m"
@@ -22,7 +22,7 @@ class ColorScheme:
 class IcedColorScheme(ColorScheme):
     """Iced color scheme."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.name: str = "Iced"
         self.TRANSPARENT = "\033[49m"
@@ -39,7 +39,7 @@ class IcedColorScheme(ColorScheme):
 class FiredColorScheme(ColorScheme):
     """Fired color scheme."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.name: str = "R.I.P tes n'œils"
         self.TRANSPARENT = "\033[49m"
