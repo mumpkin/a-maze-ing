@@ -8,14 +8,16 @@ from enum import Enum, auto
 import globals
 from maze import MazeGenerator, PerfectMazeGenerator
 from maze.imperfect_maze_generator import ImperfectMazeGenerator
+from utils import RenderEngine
 
 
 class AppState(Enum):
     """."""
 
     TitleScreen = auto()
-    Generator = auto()
+    Maze = auto()
     Config = auto()
+    ColorScheme = auto()
 
 
 class App:
@@ -28,6 +30,7 @@ class App:
             if globals.config.perfect
             else ImperfectMazeGenerator()
         )
+        self.engine: RenderEngine = RenderEngine(self.generator)
 
     def run(self) -> None:
         """Run the app."""
@@ -35,10 +38,12 @@ class App:
             match self.state:
                 case AppState.TitleScreen:
                     self._title()
-                case AppState.Generator:
-                    pass
+                case AppState.Maze:
+                    self._maze()
                 case AppState.Config:
                     self._config()
+                case AppState.ColorScheme:
+                    self._color_scheme()
 
     def _title(self):
         _ = subprocess.run("clear")
@@ -59,32 +64,32 @@ class App:
             "|::.|:. |   |::.|:. |::.|:. |::.. . |::.. . |   |::.|::.|   |::.. . |",  # noqa: E501
             "`--- ---'   `--- ---`--- ---`-------`-------'   `---`--- ---`-------'",  # noqa: E501
             "\033[0m",
+            "s: start       ",
+            "c: show config ",
+            "o: color scheme",
+            "q: quit        ",
         ]
-        options: list[str] = ["s: start", "c: show config", "q: quit"]
-        title_height: int = len(options) + len(heading)
+        title_height: int = len(heading)
         title_width: int = len(max(heading, key=len))
         if title_width >= term_width or title_height >= term_height:
             self._wait_term_size(title_width, title_height)
             term_width, term_height = os.get_terminal_size()
-        option_width: int = len(max(options, key=len))
-        fill_menu: str = "".join(
-            [" " for _ in range((term_width - option_width) // 2)]
-        )
-        for _ in range((term_height - len(heading) - len(options)) // 2):
+        for _ in range((term_height - title_height) // 2):
             print()
         for line in heading:
             print(line.center(term_width))
-        for line in options:
-            print(fill_menu + line)
 
     def _route_title_action(self, action: str):
         match action.lower():
             case "s":
                 _ = subprocess.run("clear")
-                self.state = AppState.Generator
+                self.state = AppState.Maze
             case "c":
                 _ = subprocess.run("clear")
                 self.state = AppState.Config
+            case "o":
+                _ = subprocess.run("clear")
+                self.state = AppState.ColorScheme
             case "q":
                 _ = subprocess.run("clear")
                 exit(0)
@@ -143,13 +148,82 @@ class App:
         match action.lower():
             case "s":
                 _ = subprocess.run("clear")
-                self.state = AppState.Generator
+                self.state = AppState.Maze
             case "t":
                 _ = subprocess.run("clear")
                 self.state = AppState.TitleScreen
             case "q":
                 _ = subprocess.run("clear")
                 exit(0)
+            case _:
+                pass
+
+    def _maze(self):
+        """."""
+        _ = subprocess.run("clear")
+        self.generator.generate(self.engine)
+        print("r: re-generate - t: title screen - q: quit")
+        self._route_maze_action(self._get_user_input())
+
+    def _route_maze_action(self, action: str):
+        match action.lower():
+            case "r":
+                _ = subprocess.run("clear")
+                self.state = AppState.Maze
+            case "t":
+                _ = subprocess.run("clear")
+                self.state = AppState.TitleScreen
+            case "q":
+                _ = subprocess.run("clear")
+                exit(0)
+            case _:
+                pass
+
+    def _color_scheme(self):
+        _ = subprocess.run("clear")
+        print("\033[?25l", end="")
+        self._print_color_scheme()
+        self._route_color_scheme_action(self._get_user_input())
+
+    def _print_color_scheme(self):
+        """."""
+        term_width, term_height = os.get_terminal_size()
+        heading: list[str] = [
+            "\033[1m",
+            " _______ _______ ___     _______ _______ _______ ",
+            "|   _   |   _   |   |   |   _   |   _   |   _   |",
+            "|.  1___|.  |   |.  |   |.  |   |.  l   |   1___|",
+            "|.  |___|.  |   |.  |___|.  |   |.  _   |____   |",
+            "|:  1   |:  1   |:  1   |:  1   |:  |   |:  1   |",
+            "|::.. . |::.. . |::.. . |::.. . |::.|:. |::.. . |",
+            "`-------`-------`-------`-------`--- ---`-------'",
+            "\033[0m",
+            "s: start      ",
+            "c: show config",
+            "q: quit       ",
+        ]
+        title_height: int = len(heading)
+        title_width: int = len(max(heading, key=len))
+        if title_width >= term_width or title_height >= term_height:
+            self._wait_term_size(title_width, title_height)
+            term_width, term_height = os.get_terminal_size()
+        for _ in range((term_height - title_height) // 2):
+            print()
+        for line in heading:
+            print(line.center(term_width))
+
+    def _route_color_scheme_action(self, action: str):
+        match action:
+            case "j":
+                print("pouik")
+            case "k":
+                print("pouak")
+            case "\n":
+                pass
+            case "t":
+                self.state = AppState.TitleScreen
+            case "s":
+                self.state = AppState.Maze
             case _:
                 pass
 

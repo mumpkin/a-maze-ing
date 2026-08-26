@@ -1,7 +1,7 @@
 WIDTH=30			    #Maze width (number of cells)
 HEIGHT=20			    #Maze height
-ENTRY=2,2				#Entry coordinates (x,y)
-EXIT=9,9				#Exit coordinates (x,y)
+ENTRY=1,1				#Entry coordinates (x,y)
+EXIT=29,19				#Exit coordinates (x,y)
 OUTPUT_FILE=maze.txt	#Output filename
 PERFECT=True			#Is the maze perfect?
 SEED=None               #Is the maze mazed?
