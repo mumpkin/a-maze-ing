@@ -1,16 +1,12 @@
 """ImperfectMazeGenerator definition."""
 
-from glob import glob
-from random import choice, randint, sample
+from random import randint, sample
 from time import sleep
-from turtle import width
-from typing import Optional
 
 from typing_extensions import override
 
 import globals
 from enums import CellState, Compass
-from globals.config import config
 from utils import Point, RenderEngine
 
 from . import MazeGenerator
@@ -240,9 +236,8 @@ class ImperfectMazeGenerator(MazeGenerator):
                 ),
             }
         )
-        # Much check in seeded
         self._vertical_split(corners, Compass.SOUTH, engine, "Split")
-        # self._horizontal_split(corners, Compass.EAST, engine)
+        # Must check with seed if still works
         for c in self.grid:
             match c.conns_to_hexa():
                 case "F":
@@ -264,9 +259,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.EAST)
                 cell.set_connection(Compass.SOUTH)
                 cell.set_connection(Compass.WEST)
-        # self._build_col(
-        #     self.grid[randint(0, globals.config.width - 2)], Compass.SOUTH
-        # )
         self._inital_split(engine=None)
         if engine:
             engine.render()
