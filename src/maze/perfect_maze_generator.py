@@ -50,6 +50,7 @@ class PerfectMazeGenerator(MazeGenerator):
     @override
     def generate(self, engine: utils.RenderEngine | None = None) -> None:
         """Generate the maze."""
+        random.seed(globals.config.seed) if globals.config.seed else None
         _ = subprocess.run(["clear"])
         visiting: list[Cell] = [
             cell for cell in self.grid if cell.pos == globals.config.entry
