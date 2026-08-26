@@ -1,6 +1,6 @@
 """Color Schemes enums."""
 
-from typing_extensions import final
+from typing import final
 
 
 class ColorScheme:
