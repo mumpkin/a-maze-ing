@@ -16,7 +16,7 @@ class RenderEngine:
         self.maze = maze
         self._color_scheme: ColorScheme = ColorScheme()
 
-    def _get_tile_color(self, cell: maze.Cell):
+    def _get_tile_color(self, cell: maze.Cell) -> str:
         """
         Get tile color according to a cell attributes.
 

@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 from enum import Enum, auto
-from select import select
 
 import globals
 from enums import ColorScheme, FiredColorScheme, IcedColorScheme
@@ -26,7 +25,7 @@ class AppState(Enum):
 class App:
     """App definition."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.state: AppState = AppState.TitleScreen
         self.generator: MazeGenerator = (
             PerfectMazeGenerator()
@@ -60,13 +59,13 @@ class App:
                 case AppState.ColorScheme:
                     self._color_scheme()
 
-    def _title(self):
+    def _title(self) -> None:
         _ = subprocess.run("clear")
         print("\033[?25l", end="")
         self._print_title()
         self._route_title_action(self._get_user_input())
 
-    def _print_title(self):
+    def _print_title(self) -> None:
         """."""
         term_width, term_height = os.get_terminal_size()
         heading: list[str] = [
@@ -95,7 +94,7 @@ class App:
         for line in heading:
             print(line.center(term_width))
 
-    def _route_title_action(self, action: str):
+    def _route_title_action(self, action: str) -> None:
         match action.lower():
             case "s":
                 _ = subprocess.run("clear")
@@ -115,13 +114,13 @@ class App:
             case _:
                 pass
 
-    def _config(self):
+    def _config(self) -> None:
         _ = subprocess.run("clear")
         print("\033[?25l", end="")
         self._print_config()
         self._route_config_action(self._get_user_input())
 
-    def _print_config(self):
+    def _print_config(self) -> None:
         """."""
         term_width, term_height = os.get_terminal_size()
         heading: list[str] = [
@@ -158,7 +157,7 @@ class App:
         print()
         print("t: title screen - s: start - q: quit".center(term_width))
 
-    def _route_config_action(self, action: str):
+    def _route_config_action(self, action: str) -> None:
         match action.lower():
             case "t":
                 _ = subprocess.run("clear")
@@ -254,7 +253,7 @@ class App:
             else:
                 print(line.center(term_width))
 
-    def _route_color_scheme_action(self, action: str):
+    def _route_color_scheme_action(self, action: str) -> None:
         match action:
             case "j":
                 self.schemes_index += 1
@@ -276,7 +275,7 @@ class App:
             case _:
                 pass
 
-    def _wait_term_size(self, width: int, height: int):
+    def _wait_term_size(self, width: int, height: int) -> None:
         term_width, term_height = os.get_terminal_size()
         while width >= term_width or height >= term_height:
             _ = subprocess.run("clear")
