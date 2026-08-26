@@ -28,10 +28,17 @@ class ImperfectMazeGenerator(MazeGenerator):
                 return Compass.NORTH
 
     def _ignore_logo_area(self, cell: Cell) -> bool:
-        pos = cell.pos
-        if pos:
-            pass
-        return False
+        if globals.config.width >= 9 and globals.config.height >= 7:
+            x = globals.config.width // 2
+            y = globals.config.height // 2
+            if (
+                cell.pos.x < x - 1
+                or cell.pos.x > x + 3
+                or cell.pos.y < y - 3
+                or cell.pos.y > y + 3
+            ):
+                return False
+        return True
 
     def _define_horizontal_areas(
         self, original_corners: dict[str, Point], starting_cell: Cell
@@ -139,7 +146,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            random_sample = sample(li, k=max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, len(li) // 3))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
@@ -156,7 +163,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         if engine:
             # starting_cell.state = CellState.VISITING
             engine.render()
-            sleep(0.01)
+            # sleep(0.001)
             # starting_cell.state = CellState.VISITED
         self._vertical_split(upper_area, Compass.SOUTH, engine, msg + "-->Up")
         self._vertical_split(
@@ -196,7 +203,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            random_sample = sample(li, k=max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, len(li) // 3))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
@@ -213,7 +220,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         if engine:
             # starting_cell.state = CellState.VISITING
             engine.render()
-            sleep(0.01)
+            # sleep(0.001)
             # starting_cell.state = CellState.VISITED
         self._horizontal_split(
             left_area, Compass.EAST, engine, msg + "-->Left"
@@ -233,8 +240,19 @@ class ImperfectMazeGenerator(MazeGenerator):
                 ),
             }
         )
+        # Much check in seeded
         self._vertical_split(corners, Compass.SOUTH, engine, "Split")
         # self._horizontal_split(corners, Compass.EAST, engine)
+        for c in self.grid:
+            match c.conns_to_hexa():
+                case "F":
+                    if c.get_neighbours()[Compass.EAST]:
+                        c.set_connection(Compass.WEST)
+                    else:
+                        c.set_connection(Compass.SOUTH)
+                case "F":
+                    if c.get_neighbours()[Compass.EAST]:
+                        pass
 
     @override
     def generate(self, engine: RenderEngine | None = None) -> None:
@@ -249,6 +267,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         # self._build_col(
         #     self.grid[randint(0, globals.config.width - 2)], Compass.SOUTH
         # )
-        self._inital_split(engine)
+        self._inital_split(engine=None)
         if engine:
             engine.render()
