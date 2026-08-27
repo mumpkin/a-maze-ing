@@ -112,9 +112,11 @@ class Cell:
         for c in [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]:
             self.unset_connection(c)
 
+    def conns_to_decimal(self) -> int:
+        """Return the decimal value related to the cell connections."""
+        return sum([k.value for k, v in self._connections.items() if v])
+
     def conns_to_hexa(self) -> str:
         """Return the hexadecimal value related to the cell connections."""
-        decimal_value = sum(
-            [k.value for k, v in self._connections.items() if v]
-        )
+        decimal_value = self.conns_to_decimal()
         return hex(decimal_value).removeprefix("0x").upper()
