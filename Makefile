@@ -3,14 +3,17 @@ VENV = .venv
 PY = python3
 CONFIG = config.example
 
-$(VENV):
-	$(PY) -m venv $(VENV) && source $(VENV)/bin/activate
+all: install run
 
 install: $(VENV)
 	pip install $(PM)
 	$(PM) install
 
-run: install
+$(VENV):
+	$(PY) -m venv $(VENV)
+
+run: $(VENV)
+	. ./$(VENV)/bin/activate
 	$(PM) run $(PY) src/a_maze_ing.py $(CONFIG)
 
 clean:
@@ -18,7 +21,8 @@ clean:
 	rm -rf **/*/__pycache__/
 	rm -rf .*_cache
 
-lint: install
+lint: $(VENV)
+	. ./$(VENV)/bin/activate
 	$(PM) run mypy . \
     	--warn-return-any \
     	--warn-unused-ignores \
@@ -28,9 +32,14 @@ lint: install
 	$(PM) run flake8 .
 	$(PM) run ruff check
 
-lint-strict: install
+lint-strict: $(VENV)
+	. ./$(VENV)/bin/activate
 	$(PM) run mypy --strict .
 	$(PM) run flake8 .
 	$(PM) run ruff check
 
-.PHONY: install run clean lint debug lint-strict
+debug: $(VENV)
+	. ./$(VENV)/bin/activate
+	$(PM) run $(PY) -m pdb src/a_maze_ing.py
+
+.PHONY: install all source run clean debug lint lint-strict
