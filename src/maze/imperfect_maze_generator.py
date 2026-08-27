@@ -141,7 +141,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             )
             * globals.config.width
         ]
-        next_cell = starting_cell
+        next_cell: Cell | None = starting_cell
         direction_to_unset = Compass.NORTH
         li: list[Cell] = []
 
@@ -158,7 +158,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         if len(li) > 0:
             path_number = randint(1, max(1, len(li) // 2))
             random_sample = sample(li, k=max(1, path_number))
-            # random_sample = sample(li, k=1)
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
@@ -222,7 +221,9 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
-    def _open_closed_path(self, cell: Cell, closed_directions: list[Compass]):
+    def _open_closed_path(
+        self, cell: Cell, closed_directions: list[Compass]
+    ) -> None:
         """Open a random wall if a cell is considered a dead-end."""
         for dir in closed_directions:
             neighbour = cell.get_neighbours()[dir]
@@ -232,7 +233,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         cell.set_connection(to_open)
         closed_directions.remove(to_open)
 
-    def _inital_split(self, engine: RenderEngine | None):
+    def _inital_split(self, engine: RenderEngine | None) -> None:
         """Start the recursive procedure.
 
         Open walls to prevent dead-ends from forming.
