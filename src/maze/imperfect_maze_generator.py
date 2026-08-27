@@ -1,10 +1,14 @@
 """ImperfectMazeGenerator definition."""
 
-from random import choice, sample
-from typing import Optional
+from random import choice, randint, sample, seed
+from sys import stdout
+from time import sleep
 
+from typing_extensions import override
+
+import globals
 from enums import CellState, Compass
-from utils import RenderEngine
+from utils import Point, RenderEngine
 
 from . import MazeGenerator
 from .cell import Cell
@@ -13,87 +17,295 @@ from .cell import Cell
 class ImperfectMazeGenerator(MazeGenerator):
     """Imperfect maze generator class."""
 
-    def _directional_dig(
-        self, cell: Cell, cell_list: list[Cell], direction: Compass
+    def _dispatch_logical_split(
+        self, area: dict[str, Point], engine: RenderEngine | None
     ) -> None:
-        print()
-        if cell.state == CellState.IDLE:
-            cell.state = CellState.VISITED
-        neighbour = cell.get_neighbours()[direction]
-        print(cell.get_neighbours())
-        if neighbour:
-            print("neighbour:  " + neighbour.state)
-            while neighbour and neighbour.state == CellState.IDLE:
-                neighbour.state = CellState.VISITED
-                cell_list.append(neighbour)
-                if neighbour.get_neighbours()[direction]:
-                    neighbour.set_connection(direction)
-                    neighbour = neighbour.get_neighbours()[direction]
-                print("List:", [cp.pos for cp in cell_list])
-            choice(cell_list).state = CellState.IDLE
+        """Select which split to perform next.
 
-    def _build_row(
-        self, cell: Optional[Cell], engine: Optional[RenderEngine] = None
+        If the areas width is higher than its width, split vertically.
+        Otherwise split horizontally.
+        """
+        width = area["top-right"].x - area["top-left"].x
+        height = area["bottom-left"].y - area["top-left"].y
+        if width > height:
+            self._vertical_split(area, Compass.SOUTH, engine)
+        else:
+            self._horizontal_split(area, Compass.EAST, engine)
+
+    def _ignore_logo_area(self, cell: Cell) -> bool:
+        """Return whether the cell belongs to the area of the logo."""
+        if globals.config.width >= 9 and globals.config.height >= 7:
+            x = globals.config.width // 2
+            y = globals.config.height // 2
+            if (
+                cell.pos.x < x - 3
+                or cell.pos.x > x + 3
+                or cell.pos.y < y - 2
+                or cell.pos.y > y + 2
+            ) and not (
+                cell.pos.x > x - 2
+                and cell.pos.x < x
+                and cell.pos.y > y - 2
+                and cell.pos.y < y + 2
+            ):
+                return False
+        return True
+
+    def _define_horizontal_areas(
+        self, original_corners: dict[str, Point], starting_cell: Cell
+    ) -> tuple[dict[str, Point], dict[str, Point]]:
+        """Return the up and down area after performing a vertical split."""
+        upper_area: dict[str, Point] = dict(
+            {
+                "top-left": Point(
+                    x=starting_cell.pos.x, y=original_corners["top-left"].y
+                ),
+                "top-right": Point(
+                    x=original_corners["top-right"].x,
+                    y=original_corners["top-right"].y,
+                ),
+                "bottom-left": Point(
+                    original_corners["bottom-left"].x,
+                    y=starting_cell.pos.y - 1,
+                ),
+                "bottom-right": Point(
+                    x=starting_cell.pos.x,
+                    y=starting_cell.pos.y - 1,
+                ),
+            }
+        )
+        lower_area: dict[str, Point] = dict(
+            {
+                "top-left": Point(
+                    x=original_corners["top-left"].x, y=starting_cell.pos.y
+                ),
+                "top-right": Point(
+                    x=original_corners["top-right"].x, y=starting_cell.pos.y
+                ),
+                "bottom-left": Point(
+                    x=starting_cell.pos.x,
+                    y=original_corners["bottom-left"].y,
+                ),
+                "bottom-right": original_corners["bottom-right"],
+            }
+        )
+        return upper_area, lower_area
+
+    def _define_vertical_areas(
+        self, original_corners: dict[str, Point], starting_cell: Cell
+    ) -> tuple[dict[str, Point], dict[str, Point]]:
+        """Return the left and right area after performing a vertical split."""
+        left_area: dict[str, Point] = dict(
+            {
+                "top-left": original_corners["top-left"],
+                "top-right": Point(
+                    x=starting_cell.pos.x, y=original_corners["top-right"].y
+                ),
+                "bottom-left": original_corners["bottom-left"],
+                "bottom-right": Point(
+                    x=starting_cell.pos.x, y=original_corners["bottom-right"].y
+                ),
+            }
+        )
+        right_area: dict[str, Point] = dict(
+            {
+                "top-left": Point(
+                    x=starting_cell.pos.x + 1, y=original_corners["top-left"].y
+                ),
+                "top-right": original_corners["top-right"],
+                "bottom-left": Point(
+                    x=starting_cell.pos.x + 1,
+                    y=original_corners["bottom-left"].y,
+                ),
+                "bottom-right": original_corners["bottom-right"],
+            }
+        )
+        return left_area, right_area
+
+    def _horizontal_split(
+        self,
+        area_corners: dict[str, Point],
+        direction: Compass,
+        engine: RenderEngine | None,
     ) -> None:
-        if not cell:
+        """Split horizontally the given area."""
+        if (
+            area_corners["bottom-left"].y - area_corners["top-left"].y < 1
+            or area_corners["top-right"].x - area_corners["top-left"].x < 1
+        ):
             return
-        if cell.state == CellState.VISITED:
-            return
-
-        cells_list: list[Cell] = [cell]
-        self._directional_dig(cell, cells_list, Compass.EAST)
-        self._directional_dig(cell, cells_list, Compass.WEST)
-        print("List:", [cp.pos for cp in cells_list])
-        # if len(cells_list) > 1:
-        #     next_pair = sample(cells_list, k=2)
-        #     self._build_row(
-        #         next_pair[0].get_neighbours()[Compass.NORTH], engine
-        #     )
-        #     self._build_row(
-        #         next_pair[1].get_neighbours()[Compass.SOUTH], engine
-        #     )
-
-    def _build_collumn(
-        self, cell: Optional[Cell], engine: Optional[RenderEngine] = None
-    ) -> None:
-        if not cell:
-            return
-        if cell.state == CellState.VISITED:
-            return
-
-        cells_list: list[Cell] = [cell]
-        self._directional_dig(cell, cells_list, Compass.SOUTH)
-        self._directional_dig(cell, cells_list, Compass.NORTH)
-        print("List:", [cp.pos for cp in cells_list])
-        if len(cells_list) > 1:
-            next_pair = sample(cells_list, k=2)
-            self._build_row(
-                next_pair[0].get_neighbours()[Compass.EAST], engine
+        starting_cell = self.grid[
+            area_corners["top-left"].x
+            + randint(
+                area_corners["top-left"].y + 1, area_corners["bottom-left"].y
             )
-            self._build_row(
-                next_pair[1].get_neighbours()[Compass.WEST], engine
-            )
+            * globals.config.width
+        ]
+        next_cell = starting_cell
+        direction_to_unset = Compass.NORTH
+        li: list[Cell] = []
 
-    def generate(self, engine: Optional[RenderEngine] = None) -> None:
-        """."""
+        while next_cell and next_cell.pos.x <= area_corners["top-right"].x:
+            if not (
+                next_cell.pos == globals.config.entry
+                or next_cell.pos == globals.config.exit
+            ):
+                li.append(next_cell)
+                next_cell.unset_connection(direction_to_unset)
+            next_cell = next_cell.get_neighbours()[direction]
+            while next_cell and self._ignore_logo_area(next_cell):
+                next_cell = next_cell.get_neighbours()[direction]
+        if len(li) > 0:
+            path_number = randint(1, max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, path_number))
+            # random_sample = sample(li, k=1)
+            for cell in random_sample:
+                cell.set_connection(direction_to_unset)
+
+        upper_area, lower_area = self._define_horizontal_areas(
+            area_corners, starting_cell
+        )
+        if engine is not None:
+            _ = stdout.write("\033[H")
+            _ = stdout.flush()
+            engine.render()
+            sleep(globals.config.delay)
+        self._dispatch_logical_split(upper_area, engine)
+        self._dispatch_logical_split(lower_area, engine)
+
+    def _vertical_split(
+        self,
+        area_corners: dict[str, Point],
+        direction: Compass,
+        engine: RenderEngine | None,
+    ) -> None:
+        """Split vertically the given area."""
+        if (
+            area_corners["bottom-left"].y - area_corners["top-left"].y < 1
+            or area_corners["top-right"].x - area_corners["top-left"].x < 1
+        ):
+            return
+        starting_cell: Cell = self.grid[
+            randint(
+                area_corners["top-left"].x + 1, area_corners["top-right"].x
+            )
+            + area_corners["top-left"].y * globals.config.width
+        ]
+        next_cell: Cell | None = starting_cell
+        direction_to_unset: Compass = Compass.EAST
+        li: list[Cell] = []
+
+        while next_cell and next_cell.pos.y <= area_corners["bottom-left"].y:
+            if not (
+                next_cell.pos == globals.config.entry
+                or next_cell.pos == globals.config.exit
+            ):
+                li.append(next_cell)
+                next_cell.unset_connection(direction_to_unset)
+            next_cell = next_cell.get_neighbours()[direction]
+            while next_cell and self._ignore_logo_area(next_cell):
+                next_cell = next_cell.get_neighbours()[direction]
+        if len(li) > 0:
+            path_number = randint(1, max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, path_number))
+            for cell in random_sample:
+                cell.set_connection(direction_to_unset)
+
+        left_area, right_area = self._define_vertical_areas(
+            area_corners, starting_cell
+        )
+        if engine is not None:
+            _ = stdout.write("\033[H")
+            _ = stdout.flush()
+            engine.render()
+            sleep(globals.config.delay)
+        self._dispatch_logical_split(left_area, engine)
+        self._dispatch_logical_split(right_area, engine)
+
+    def _open_closed_path(self, cell: Cell, closed_directions: list[Compass]):
+        """Open a random wall if a cell is considered a dead-end."""
+        for dir in closed_directions:
+            neighbour = cell.get_neighbours()[dir]
+            if neighbour and neighbour.state != CellState.VISITED:
+                closed_directions.remove(dir)
+        to_open = choice(closed_directions)
+        cell.set_connection(to_open)
+        closed_directions.remove(to_open)
+
+    def _inital_split(self, engine: RenderEngine | None):
+        """Start the recursive procedure.
+
+        Open walls to prevent dead-ends from forming.
+        """
+        corners = dict(
+            {
+                "top-left": Point(x=0, y=0),
+                "top-right": Point(x=globals.config.width - 1, y=0),
+                "bottom-left": Point(x=0, y=globals.config.height - 1),
+                "bottom-right": Point(
+                    x=globals.config.width - 1, y=globals.config.height - 1
+                ),
+            }
+        )
+        self._dispatch_logical_split(corners, engine)
+        for c in self.grid:
+            if c.state == CellState.LOCKED:
+                continue
+            match c.conns_to_decimal():
+                case 8:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.SOUTH,
+                    ]
+                    self._open_closed_path(c, closed_directions)
+                case 4:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(c, closed_directions)
+                case 2:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(c, closed_directions)
+                case 1:
+                    closed_directions = [
+                        Compass.EAST,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(c, closed_directions)
+                case 0:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(c, closed_directions)
+                case _:
+                    continue
+
+    @override
+    def generate(self, engine: RenderEngine | None = None) -> None:
+        """Generate an imperfect maze.
+
+        The generation follows an inspired logic from the
+        recursive division algorithm.
+        """
         for cell in self.grid:
-            print(cell.state)
             if cell.state != CellState.LOCKED:
                 cell.state = CellState.VISITED
-                cell.get_connections()[Compass.NORTH]
-                cell.get_connections()[Compass.EAST]
-                cell.get_connections()[Compass.SOUTH]
-                cell.get_connections()[Compass.WEST]
-                print()
-                print(cell.get_connections())
-                print(cell.get_neighbours())
-        # if randint(0, 1) == 0:
-        #    self._build_row(self.grid[randint(0, globals.config.width)])
-        # else:
-        #    self._build_collumn(
-        #        self.grid[
-        #            randint(0, globals.config.height)
-        #            * (globals.config.width + 1)
-        #        ]
-        #    )
-        # self._build_collumn(self.grid[randint(0, globals.config.width - 1)])
+                cell.set_connection(Compass.NORTH)
+                cell.set_connection(Compass.EAST)
+                cell.set_connection(Compass.SOUTH)
+                cell.set_connection(Compass.WEST)
+        if globals.config.seed is not None:
+            seed(globals.config.seed)
+        self._inital_split(engine=engine)
