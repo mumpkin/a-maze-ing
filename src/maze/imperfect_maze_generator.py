@@ -1,6 +1,6 @@
 """ImperfectMazeGenerator definition."""
 
-from random import randint, sample
+from random import choice, randint, sample
 from time import sleep
 
 from typing_extensions import override
@@ -36,10 +36,10 @@ class ImperfectMazeGenerator(MazeGenerator):
                 or cell.pos.y < y - 2
                 or cell.pos.y > y + 2
             ) and not (
-                cell.pos.x < x - 2
-                and cell.pos.x > x
-                and cell.pos.y < y - 2
-                and cell.pos.y > y + 2
+                cell.pos.x > x - 2
+                and cell.pos.x < x
+                and cell.pos.y > y - 2
+                and cell.pos.y < y + 2
             ):
                 return False
         return True
@@ -146,33 +146,22 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            # path_number = randint(1, max(1, len(li) // 2))
-            # random_sample = sample(li, k=max(1, path_number))
-            random_sample = sample(li, k=1)
+            path_number = randint(1, max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, path_number))
+            # random_sample = sample(li, k=1)
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
         upper_area, lower_area = self._define_horizontal_areas(
             area_corners, starting_cell
         )
-
-        print(
-            "Horizontal split\n",
-            f"starting cell: {starting_cell.pos}\n",
-            f"Direction : {direction_to_unset}\n",
-            f"Upper area:\n{upper_area}\nLower area: \n{lower_area}",
-        )
         if engine:
             # starting_cell.state = CellState.VISITING
             engine.render()
             sleep(0.001)
             # starting_cell.state = CellState.VISITED
-
         self._dispatch_logical_split(upper_area, engine)
         self._dispatch_logical_split(lower_area, engine)
-        #
-        # self._vertical_split(upper_area, Compass.SOUTH, engine)
-        # self._vertical_split(lower_area, Compass.SOUTH, engine)
 
     def _vertical_split(
         self,
@@ -206,33 +195,22 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            # path_number = randint(1, max(1, len(li) // 2))
-            # random_sample = sample(li, k=max(1, path_number))
-            random_sample = sample(li, k=1)
+            path_number = randint(1, max(1, len(li) // 2))
+            random_sample = sample(li, k=max(1, path_number))
+            # random_sample = sample(li, k=1)
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
         left_area, right_area = self._define_vertical_areas(
             area_corners, starting_cell
         )
-
-        print(
-            "Vertical split\n",
-            f"starting cell: {starting_cell.pos}\n",
-            f"Direction : {direction_to_unset}\n",
-            f"Left area:\n{left_area}\nRight area: \n{right_area}",
-        )
         if engine:
             # starting_cell.state = CellState.VISITING
             engine.render()
             sleep(0.001)
             # starting_cell.state = CellState.VISITED
-
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
-        # previous logic
-        # self._horizontal_split(left_area, Compass.EAST, engine)
-        # self._horizontal_split(right_area, Compass.EAST, engine)
 
     def _inital_split(self, engine: RenderEngine | None):
         corners = dict(
@@ -248,11 +226,19 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._vertical_split(corners, Compass.SOUTH, engine)
         # Must check with seed if still works
         for c in self.grid:
-            match c.conns_to_hexa():
-                case "F":
-                    c.set_connection(Compass.WEST)
-                case "7":
-                    c.set_connection(Compass.EAST)
+            match c.sum_connections_value():
+                case 8:
+                    rand_dir = [Compass.NORTH, Compass.EAST, Compass.SOUTH]
+                    c.set_connection(sample(rand_dir, k=1)[0])
+                case 4:
+                    rand_dir = [Compass.NORTH, Compass.EAST, Compass.WEST]
+                    c.set_connection(sample(rand_dir, k=1)[0])
+                case 2:
+                    rand_dir = [Compass.NORTH, Compass.SOUTH, Compass.WEST]
+                    c.set_connection(sample(rand_dir, k=1)[0])
+                case 1:
+                    rand_dir = [Compass.EAST, Compass.SOUTH, Compass.WEST]
+                    c.set_connection(sample(rand_dir, k=1)[0])
 
     @override
     def generate(self, engine: RenderEngine | None = None) -> None:
