@@ -1,10 +1,9 @@
 """ImperfectMazeGenerator definition."""
 
-from random import choice, randint, sample, seed
+import random
 from sys import stdout
 from time import sleep
-
-from typing_extensions import override
+from typing import override
 
 import globals
 from enums import CellState, Compass
@@ -136,7 +135,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
         starting_cell = self.grid[
             area_corners["top-left"].x
-            + randint(
+            + random.randint(
                 area_corners["top-left"].y + 1, area_corners["bottom-left"].y
             )
             * globals.config.width
@@ -156,8 +155,8 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            path_number = randint(1, max(1, len(li) // 2))
-            random_sample = sample(li, k=max(1, path_number))
+            path_number = random.randint(1, max(1, len(li) // 2))
+            random_sample = random.sample(li, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
@@ -185,7 +184,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         ):
             return
         starting_cell: Cell = self.grid[
-            randint(
+            random.randint(
                 area_corners["top-left"].x + 1, area_corners["top-right"].x
             )
             + area_corners["top-left"].y * globals.config.width
@@ -205,8 +204,8 @@ class ImperfectMazeGenerator(MazeGenerator):
             while next_cell and self._ignore_logo_area(next_cell):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
-            path_number = randint(1, max(1, len(li) // 2))
-            random_sample = sample(li, k=max(1, path_number))
+            path_number = random.randint(1, max(1, len(li) // 2))
+            random_sample = random.sample(li, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
 
@@ -229,7 +228,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             neighbour = cell.get_neighbours()[dir]
             if neighbour and neighbour.state != CellState.VISITED:
                 closed_directions.remove(dir)
-        to_open = choice(closed_directions)
+        to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
         closed_directions.remove(to_open)
 
@@ -308,5 +307,5 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.SOUTH)
                 cell.set_connection(Compass.WEST)
         if globals.config.seed is not None:
-            seed(globals.config.seed)
+            random.seed(globals.config.seed)
         self._inital_split(engine=engine)
