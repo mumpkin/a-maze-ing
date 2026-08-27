@@ -228,6 +228,8 @@ class ImperfectMazeGenerator(MazeGenerator):
             neighbour = cell.get_neighbours()[dir]
             if neighbour and neighbour.state != CellState.VISITED:
                 closed_directions.remove(dir)
+        if len(closed_directions) == 0:
+            return
         to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
         closed_directions.remove(to_open)
