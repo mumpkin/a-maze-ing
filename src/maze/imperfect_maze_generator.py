@@ -152,7 +152,12 @@ class ImperfectMazeGenerator(MazeGenerator):
                 li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            while next_cell and self._ignore_logo_area(next_cell):
+            while (
+                next_cell
+                and self._ignore_logo_area(next_cell)
+                and globals.config.width >= 9
+                and globals.config.height >= 7
+            ):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
@@ -201,7 +206,12 @@ class ImperfectMazeGenerator(MazeGenerator):
                 li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            while next_cell and self._ignore_logo_area(next_cell):
+            while (
+                next_cell
+                and self._ignore_logo_area(next_cell)
+                and globals.config.width >= 9
+                and globals.config.height >= 7
+            ):
                 next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
