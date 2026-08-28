@@ -42,7 +42,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                 or cell.pos.y < y - 2
                 or cell.pos.y > y + 2
             ) and not (
-                cell.pos.x > x - 2
+                cell.pos.x > x - 3
                 and cell.pos.x < x
                 and cell.pos.y > y - 2
                 and cell.pos.y < y + 2
@@ -230,19 +230,29 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
+    def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
+        neighbours = cell.get_neighbours()
+        for n in neighbours.values():
+            if n and n.state == CellState.LOCKED:
+                return True
+        return False
+
     def _open_closed_path(
-        self, cell: Cell, closed_directions: list[Compass]
+        self,
+        cell: Cell,
+        closed_directions: list[Compass],
     ) -> None:
         """Open a random wall if a cell is considered a dead-end."""
         for dir in closed_directions:
             neighbour = cell.get_neighbours()[dir]
-            if neighbour and neighbour.state != CellState.VISITED:
+            if (
+                neighbour and neighbour.state == CellState.LOCKED
+            ) or cell.get_connections()[dir]:
                 closed_directions.remove(dir)
         if len(closed_directions) == 0:
             return
         to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
-        closed_directions.remove(to_open)
 
     def _inital_split(self, engine: RenderEngine | None) -> None:
         """Start the recursive procedure.
@@ -302,6 +312,14 @@ class ImperfectMazeGenerator(MazeGenerator):
                     self._open_closed_path(c, closed_directions)
                     self._open_closed_path(c, closed_directions)
                 case _:
+                    if self._does_cell_have_locked_neighbour(c):
+                        closed_directions = [
+                            Compass.NORTH,
+                            Compass.EAST,
+                            Compass.SOUTH,
+                            Compass.WEST,
+                        ]
+                        self._open_closed_path(c, closed_directions)
                     continue
 
     @override
