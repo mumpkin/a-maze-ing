@@ -93,16 +93,16 @@ class Cell:
                 if val == self:
                     neighbour._connections[dir] = True
 
-    def unset_connection(self, dir: Compass) -> None:
+    def unset_connection(self, direction: Compass) -> None:
         """
         Remove the connection to the given direction.
 
         Keyword parameters:
         dir: Compass -- Compass direction to set to `True`.
         """
-        neighbour = self._neighbours[dir]
+        neighbour = self._neighbours[direction]
         if neighbour:
-            self._connections[dir] = False
+            self._connections[direction] = False
             for dir, val in neighbour._neighbours.items():
                 if val == self:
                     neighbour._connections[dir] = False
