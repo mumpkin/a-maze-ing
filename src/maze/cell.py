@@ -100,9 +100,9 @@ class Cell:
         Keyword parameters:
         dir: Compass -- Compass direction to set to `True`.
         """
-        self._connections[dir] = False
         neighbour = self._neighbours[dir]
         if neighbour:
+            self._connections[dir] = False
             for dir, val in neighbour._neighbours.items():
                 if val == self:
                     neighbour._connections[dir] = False
