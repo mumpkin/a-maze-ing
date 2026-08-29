@@ -1,6 +1,7 @@
 """ImperfectMazeGenerator definition."""
 
 import random
+from socket import EAI_SERVICE
 from sys import stdout
 from time import sleep
 from typing import override
@@ -123,7 +124,8 @@ class ImperfectMazeGenerator(MazeGenerator):
         ]
         next_cell: Cell | None = starting_cell
         direction_to_unset = Compass.NORTH
-        li: list[Cell] = []
+        segments: list[list[Cell]] = []
+        segment_cells: list[Cell] = []
 
         while next_cell and next_cell.pos.x <= area_corners["top-right"].x:
             if not (
@@ -131,15 +133,31 @@ class ImperfectMazeGenerator(MazeGenerator):
                 or next_cell.pos == globals.config.exit
             ):
                 if next_cell.state == CellState.VISITED:
-                    li.append(next_cell)
+                    segment_cells.append(next_cell)
+                elif len(segment_cells) > 0:
+                    segments.append(segment_cells)
+                    segment_cells = []
+                # if (
+                #     globals.config.width >= 9 and globals.config.height >= 7
+                # ) and not (
+                #     next_cell.pos.x == globals.config.width // 2
+                #     and next_cell.pos.y == globals.config.height // 2 - 2
+                # ):
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-        if len(li) > 0:
-            path_number = random.randint(1, max(1, len(li) // 2))
-            random_sample = random.sample(li, k=max(1, path_number))
+            if engine is not None:
+                _ = stdout.write("\033[H")
+                _ = stdout.flush()
+                engine.render()
+                sleep(globals.config.delay)
+
+        if len(segment_cells) > 0:
+            segments.append(segment_cells)
+        for segment_cells in segments:
+            path_number = random.randint(1, max(1, len(segment_cells) // 2))
+            random_sample = random.sample(segment_cells, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
-
         upper_area, lower_area = self._define_horizontal_areas(
             area_corners, starting_cell
         )
@@ -171,23 +189,46 @@ class ImperfectMazeGenerator(MazeGenerator):
         ]
         next_cell: Cell | None = starting_cell
         direction_to_unset: Compass = Compass.EAST
-        li: list[Cell] = []
+        segments: list[list[Cell]] = []
+        segment_cells: list[Cell] = []
 
         while next_cell and next_cell.pos.y <= area_corners["bottom-left"].y:
             if not (
                 next_cell.pos == globals.config.entry
                 or next_cell.pos == globals.config.exit
             ):
-                if next_cell.state == CellState.VISITED:
-                    li.append(next_cell)
+                east_neighbour = next_cell.get_neighbours()[Compass.EAST]
+                if (
+                    next_cell.state == CellState.VISITED
+                    or (
+                        # east_neighbour and east_neighbour.state == CellState.LOCKED
+                    )
+                ):
+                    segment_cells.append(next_cell)
+                elif len(segment_cells) > 0:
+                    segments.append(segment_cells)
+                    segment_cells = []
+                # if (
+                #     globals.config.width >= 9 and globals.config.height >= 7
+                # ) and not (
+                #     next_cell.pos.x == globals.config.width // 2
+                #     and next_cell.pos.y == globals.config.height // 2 - 2
+                # ):
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-        if len(li) > 0:
-            path_number = random.randint(1, max(1, len(li) // 2))
-            random_sample = random.sample(li, k=max(1, path_number))
+            if engine is not None:
+                _ = stdout.write("\033[H")
+                _ = stdout.flush()
+                engine.render()
+                sleep(globals.config.delay)
+
+        if len(segment_cells) > 0:
+            segments.append(segment_cells)
+        for segment_cells in segments:
+            path_number = random.randint(1, max(1, len(segment_cells) // 2))
+            random_sample = random.sample(segment_cells, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
-
         left_area, right_area = self._define_vertical_areas(
             area_corners, starting_cell
         )
@@ -199,20 +240,21 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
-    def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
-        """Check if the curent cell has any locked neighbours."""
-        neighbours = cell.get_neighbours()
-        for n in neighbours.values():
-            if n and n.state == CellState.LOCKED:
-                return True
-        return False
-
     def _open_closed_path(
         self,
         cell: Cell,
         closed_directions: list[Compass],
     ) -> None:
-        """Open a random wall if a cell is considered a dead-end."""
+        """Open a random wall if a cell is considered a dead end.
+
+        Parameters
+        ----------
+        cell: Cell
+            A cell from the grid presenting a dead end.
+        closed_directions: list[Compass]
+            A list containing the possibly valid directions towards neighbours
+            of the current cell to create a new path
+        """
         for dir in closed_directions:
             neighbour = cell.get_neighbours()[dir]
             if (
@@ -223,6 +265,14 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
         to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
+
+    def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
+        """Check if the curent cell has any locked neighbours."""
+        neighbours = cell.get_neighbours()
+        for _, v in neighbours.items():
+            if v and v.state == CellState.LOCKED:
+                return True
+        return False
 
     def _eliminate_deadends(self) -> None:
         """Destroy dead ends by randomly hollowing walls.
@@ -307,7 +357,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         ----------
         engine: `RenderEngine`
             Passing this argument into the program allows to render the maze
-            step-by-step
+            step-by-
         """
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
