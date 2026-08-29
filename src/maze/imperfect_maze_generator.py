@@ -31,25 +31,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         else:
             self._horizontal_split(area, Compass.EAST, engine)
 
-    def _ignore_logo_area(self, cell: Cell) -> bool:
-        """Return whether the cell belongs to the area of the logo."""
-        if globals.config.width >= 9 and globals.config.height >= 7:
-            x = globals.config.width // 2
-            y = globals.config.height // 2
-            if (
-                cell.pos.x < x - 3
-                or cell.pos.x > x + 3
-                or cell.pos.y < y - 2
-                or cell.pos.y > y + 2
-            ) and not (
-                cell.pos.x > x - 3
-                and cell.pos.x < x
-                and cell.pos.y > y - 2
-                and cell.pos.y < y + 2
-            ):
-                return False
-        return True
-
     def _define_horizontal_areas(
         self, original_corners: dict[str, Point], starting_cell: Cell
     ) -> tuple[dict[str, Point], dict[str, Point]]:
@@ -153,13 +134,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                     li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            # while (
-            #     next_cell
-            #     and self._ignore_logo_area(next_cell)
-            #     and globals.config.width >= 9
-            #     and globals.config.height >= 7
-            # ):
-            #     next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
             random_sample = random.sample(li, k=max(1, path_number))
@@ -208,13 +182,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                     li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            # while (
-            #     next_cell
-            #     and self._ignore_logo_area(next_cell)
-            #     and globals.config.width >= 9
-            #     and globals.config.height >= 7
-            # ):
-            #     next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
             random_sample = random.sample(li, k=max(1, path_number))
@@ -257,22 +224,12 @@ class ImperfectMazeGenerator(MazeGenerator):
         to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
 
-    def _inital_split(self, engine: RenderEngine | None) -> None:
-        """Start the recursive procedure.
+    def _eliminate_deadends(self) -> None:
+        """Destroy dead ends by randomly hollowing walls.
 
-        Open walls to prevent dead-ends from forming.
+        This method targets cells with only one connection and tries to connect
+        the afore-mentionned cell with one of its neighbour.
         """
-        corners = dict(
-            {
-                "top-left": Point(x=0, y=0),
-                "top-right": Point(x=globals.config.width - 1, y=0),
-                "bottom-left": Point(x=0, y=globals.config.height - 1),
-                "bottom-right": Point(
-                    x=globals.config.width - 1, y=globals.config.height - 1
-                ),
-            }
-        )
-        self._dispatch_logical_split(corners, engine)
         for c in self.grid:
             if c.state == CellState.LOCKED:
                 continue
@@ -325,12 +282,32 @@ class ImperfectMazeGenerator(MazeGenerator):
                         self._open_closed_path(c, closed_directions)
                     continue
 
+    def _imperfect_generation(self, engine: RenderEngine | None) -> None:
+        """Perform the creation of the maze."""
+        corners = dict(
+            {
+                "top-left": Point(x=0, y=0),
+                "top-right": Point(x=globals.config.width - 1, y=0),
+                "bottom-left": Point(x=0, y=globals.config.height - 1),
+                "bottom-right": Point(
+                    x=globals.config.width - 1, y=globals.config.height - 1
+                ),
+            }
+        )
+        self._dispatch_logical_split(corners, engine)
+
     @override
     def generate(self, engine: RenderEngine | None = None) -> None:
         """Generate an imperfect maze.
 
-        The generation follows an inspired logic from the
+        The generation follows a inspired logic from the
         recursive division algorithm.
+
+        Parameters
+        ----------
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
         """
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
@@ -341,4 +318,5 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.WEST)
         if globals.config.seed is not None:
             random.seed(globals.config.seed)
-        self._inital_split(engine=engine)
+        self._imperfect_generation(engine=engine)
+        self._eliminate_deadends()
