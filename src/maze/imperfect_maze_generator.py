@@ -198,11 +198,8 @@ class ImperfectMazeGenerator(MazeGenerator):
                 or next_cell.pos == globals.config.exit
             ):
                 east_neighbour = next_cell.get_neighbours()[Compass.EAST]
-                if (
-                    next_cell.state == CellState.VISITED
-                    or (
-                        # east_neighbour and east_neighbour.state == CellState.LOCKED
-                    )
+                if next_cell.state == CellState.VISITED and not (
+                    east_neighbour and east_neighbour.state == CellState.LOCKED
                 ):
                     segment_cells.append(next_cell)
                 elif len(segment_cells) > 0:
@@ -266,6 +263,23 @@ class ImperfectMazeGenerator(MazeGenerator):
         to_open = random.choice(closed_directions)
         cell.set_connection(to_open)
 
+    def _biggus_roomus_violatus(self, cell: Cell) -> None:
+        """Violate the integrity of overly large rooms by raising a wall."""
+        north_neighbour = cell.get_neighbours()[Compass.WEST]
+        south_neighbour = cell.get_neighbours()[Compass.SOUTH]
+        if (cell and north_neighbour and south_neighbour) and (
+            cell.get_connections()[Compass.NORTH]
+            and cell.get_connections()[Compass.EAST]
+            and cell.get_connections()[Compass.WEST]
+            and cell.get_connections()[Compass.SOUTH]
+            and north_neighbour.get_connections()[Compass.EAST]
+            and north_neighbour.get_connections()[Compass.WEST]
+            and south_neighbour.get_connections()[Compass.EAST]
+            and south_neighbour.get_connections()[Compass.WEST]
+        ):
+            direction = [d for d in Compass]
+            cell.unset_connection(random.choice(direction))
+
     def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
         """Check if the curent cell has any locked neighbours."""
         neighbours = cell.get_neighbours()
@@ -280,38 +294,39 @@ class ImperfectMazeGenerator(MazeGenerator):
         This method targets cells with only one connection and tries to connect
         the afore-mentionned cell with one of its neighbour.
         """
-        for c in self.grid:
-            if c.state == CellState.LOCKED:
+        for cell in self.grid:
+            if cell.state == CellState.LOCKED:
                 continue
-            match c.conns_to_decimal():
+            self._biggus_roomus_violatus(cell)
+            match cell.conns_to_decimal():
                 case 8:
                     closed_directions = [
                         Compass.NORTH,
                         Compass.EAST,
                         Compass.SOUTH,
                     ]
-                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
                 case 4:
                     closed_directions = [
                         Compass.NORTH,
                         Compass.EAST,
                         Compass.WEST,
                     ]
-                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
                 case 2:
                     closed_directions = [
                         Compass.NORTH,
                         Compass.SOUTH,
                         Compass.WEST,
                     ]
-                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
                 case 1:
                     closed_directions = [
                         Compass.EAST,
                         Compass.SOUTH,
                         Compass.WEST,
                     ]
-                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
                 case 0:
                     closed_directions = [
                         Compass.NORTH,
@@ -319,17 +334,17 @@ class ImperfectMazeGenerator(MazeGenerator):
                         Compass.SOUTH,
                         Compass.WEST,
                     ]
-                    self._open_closed_path(c, closed_directions)
-                    self._open_closed_path(c, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
                 case _:
-                    if self._does_cell_have_locked_neighbour(c):
+                    if self._does_cell_have_locked_neighbour(cell):
                         closed_directions = [
                             Compass.NORTH,
                             Compass.EAST,
                             Compass.SOUTH,
                             Compass.WEST,
                         ]
-                        self._open_closed_path(c, closed_directions)
+                        self._open_closed_path(cell, closed_directions)
                     continue
 
     def _imperfect_generation(self, engine: RenderEngine | None) -> None:
@@ -359,6 +374,11 @@ class ImperfectMazeGenerator(MazeGenerator):
             Passing this argument into the program allows to render the maze
             step-by-
         """
+        import time
+
+        # toki = time.time()
+        random.seed(1788027394.5928006)
+        # print(f"seed: {toki}")
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
                 cell.state = CellState.VISITED
@@ -366,7 +386,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.EAST)
                 cell.set_connection(Compass.SOUTH)
                 cell.set_connection(Compass.WEST)
-        if globals.config.seed is not None:
-            random.seed(globals.config.seed)
+        # if globals.config.seed is not None:
+        # random.seed(globals.config.seed)
         self._imperfect_generation(engine=engine)
         self._eliminate_deadends()
