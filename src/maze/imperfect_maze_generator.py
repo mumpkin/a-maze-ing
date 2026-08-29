@@ -149,16 +149,17 @@ class ImperfectMazeGenerator(MazeGenerator):
                 next_cell.pos == globals.config.entry
                 or next_cell.pos == globals.config.exit
             ):
-                li.append(next_cell)
+                if next_cell.state == CellState.VISITED:
+                    li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            while (
-                next_cell
-                and self._ignore_logo_area(next_cell)
-                and globals.config.width >= 9
-                and globals.config.height >= 7
-            ):
-                next_cell = next_cell.get_neighbours()[direction]
+            # while (
+            #     next_cell
+            #     and self._ignore_logo_area(next_cell)
+            #     and globals.config.width >= 9
+            #     and globals.config.height >= 7
+            # ):
+            #     next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
             random_sample = random.sample(li, k=max(1, path_number))
@@ -190,7 +191,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
         starting_cell: Cell = self.grid[
             random.randint(
-                area_corners["top-left"].x + 1, area_corners["top-right"].x
+                area_corners["top-left"].x + 1, area_corners["top-right"].x - 1
             )
             + area_corners["top-left"].y * globals.config.width
         ]
@@ -203,16 +204,17 @@ class ImperfectMazeGenerator(MazeGenerator):
                 next_cell.pos == globals.config.entry
                 or next_cell.pos == globals.config.exit
             ):
-                li.append(next_cell)
+                if next_cell.state == CellState.VISITED:
+                    li.append(next_cell)
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            while (
-                next_cell
-                and self._ignore_logo_area(next_cell)
-                and globals.config.width >= 9
-                and globals.config.height >= 7
-            ):
-                next_cell = next_cell.get_neighbours()[direction]
+            # while (
+            #     next_cell
+            #     and self._ignore_logo_area(next_cell)
+            #     and globals.config.width >= 9
+            #     and globals.config.height >= 7
+            # ):
+            #     next_cell = next_cell.get_neighbours()[direction]
         if len(li) > 0:
             path_number = random.randint(1, max(1, len(li) // 2))
             random_sample = random.sample(li, k=max(1, path_number))
@@ -231,6 +233,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(right_area, engine)
 
     def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
+        """Check if the curent cell has any locked neighbours."""
         neighbours = cell.get_neighbours()
         for n in neighbours.values():
             if n and n.state == CellState.LOCKED:
