@@ -255,8 +255,11 @@ class ImperfectMazeGenerator(MazeGenerator):
         for dir in closed_directions:
             neighbour = cell.get_neighbours()[dir]
             if (
-                neighbour and neighbour.state == CellState.LOCKED
-            ) or cell.get_connections()[dir]:
+                neighbour
+                and neighbour.state == CellState.LOCKED
+                or cell.get_connections()[dir]
+                or cell.get_neighbours()[dir] is None
+            ):
                 closed_directions.remove(dir)
         if len(closed_directions) == 0:
             return
@@ -265,20 +268,35 @@ class ImperfectMazeGenerator(MazeGenerator):
 
     def _biggus_roomus_violatus(self, cell: Cell) -> None:
         """Violate the integrity of overly large rooms by raising a wall."""
-        north_neighbour = cell.get_neighbours()[Compass.WEST]
+        north_neighbour = cell.get_neighbours()[Compass.NORTH]
+        east_neighbour = cell.get_neighbours()[Compass.EAST]
         south_neighbour = cell.get_neighbours()[Compass.SOUTH]
-        if (cell and north_neighbour and south_neighbour) and (
-            cell.get_connections()[Compass.NORTH]
-            and cell.get_connections()[Compass.EAST]
-            and cell.get_connections()[Compass.WEST]
-            and cell.get_connections()[Compass.SOUTH]
-            and north_neighbour.get_connections()[Compass.EAST]
-            and north_neighbour.get_connections()[Compass.WEST]
-            and south_neighbour.get_connections()[Compass.EAST]
-            and south_neighbour.get_connections()[Compass.WEST]
+        west_neighbour = cell.get_neighbours()[Compass.WEST]
+        if (
+            cell
+            and north_neighbour
+            and east_neighbour
+            and south_neighbour
+            and west_neighbour
+        ) and (
+            all(cell.get_connections().values())
+            and north_neighbour.get_connections()[Compass.EAST] is True
+            and north_neighbour.get_connections()[Compass.WEST] is True
+            # and south_neighbour.get_connections()[Compass.EAST] is True
+            and south_neighbour.get_connections()[Compass.WEST] is True
+            and east_neighbour.get_connections()[Compass.NORTH] is True
+            and east_neighbour.get_connections()[Compass.SOUTH] is True
+            and west_neighbour.get_connections()[Compass.NORTH] is True
+            # and west_neighbour.get_connections()[Compass.SOUTH] is True
         ):
+            print(
+                f"Cell neighours: {cell.get_connections()}",
+                f"\nNorth neighbour neigbours: {north_neighbour.get_connections()}",
+                f"\nWestNeighbours: {west_neighbour.get_connections()}",
+            )
             direction = [d for d in Compass]
-            cell.unset_connection(random.choice(direction))
+            # cell.unset_connection(random.choice(direction))
+            cell.state = CellState.VISITING
 
     def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
         """Check if the curent cell has any locked neighbours."""
@@ -295,9 +313,9 @@ class ImperfectMazeGenerator(MazeGenerator):
         the afore-mentionned cell with one of its neighbour.
         """
         for cell in self.grid:
+            self._biggus_roomus_violatus(cell)
             if cell.state == CellState.LOCKED:
                 continue
-            self._biggus_roomus_violatus(cell)
             match cell.conns_to_decimal():
                 case 8:
                     closed_directions = [
@@ -345,7 +363,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                             Compass.WEST,
                         ]
                         self._open_closed_path(cell, closed_directions)
-                    continue
 
     def _imperfect_generation(self, engine: RenderEngine | None) -> None:
         """Perform the creation of the maze."""
@@ -376,9 +393,9 @@ class ImperfectMazeGenerator(MazeGenerator):
         """
         import time
 
-        # toki = time.time()
-        random.seed(1788027394.5928006)
-        # print(f"seed: {toki}")
+        toki = time.time()
+        random.seed(1788134706.2530549)
+        print(f"seed: {toki}")
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
                 cell.state = CellState.VISITED
