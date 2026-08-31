@@ -101,7 +101,7 @@ class Cell:
         dir: Compass -- Compass direction to set to `True`.
         """
         neighbour = self._neighbours[direction]
-        if neighbour:
+        if neighbour and neighbour.state != CellState.LOCKED:
             self._connections[direction] = False
             for dir, val in neighbour._neighbours.items():
                 if val == self:
