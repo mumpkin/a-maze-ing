@@ -1,7 +1,6 @@
 """ImperfectMazeGenerator definition."""
 
 import random
-from socket import EAI_SERVICE
 from sys import stdout
 from time import sleep
 from typing import override
@@ -137,12 +136,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                 elif len(segment_cells) > 0:
                     segments.append(segment_cells)
                     segment_cells = []
-                # if (
-                #     globals.config.width >= 9 and globals.config.height >= 7
-                # ) and not (
-                #     next_cell.pos.x == globals.config.width // 2
-                #     and next_cell.pos.y == globals.config.height // 2 - 2
-                # ):
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
             if engine is not None:
@@ -205,12 +198,6 @@ class ImperfectMazeGenerator(MazeGenerator):
                 elif len(segment_cells) > 0:
                     segments.append(segment_cells)
                     segment_cells = []
-                # if (
-                #     globals.config.width >= 9 and globals.config.height >= 7
-                # ) and not (
-                #     next_cell.pos.x == globals.config.width // 2
-                #     and next_cell.pos.y == globals.config.height // 2 - 2
-                # ):
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
             if engine is not None:
@@ -237,6 +224,22 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
+    def _is_a_deadend(self, cell: Cell) -> bool:
+        """Check if the cell passed in argument is a dead end."""
+        match cell.conns_to_decimal():
+            case 0:
+                return True
+            case 1:
+                return True
+            case 2:
+                return True
+            case 4:
+                return True
+            case 8:
+                return True
+            case _:
+                return False
+
     def _open_closed_path(
         self,
         cell: Cell,
@@ -254,49 +257,30 @@ class ImperfectMazeGenerator(MazeGenerator):
         """
         for dir in closed_directions:
             neighbour = cell.get_neighbours()[dir]
-            if (
-                neighbour
-                and neighbour.state == CellState.LOCKED
-                or cell.get_connections()[dir]
+            if (neighbour and neighbour.state == CellState.LOCKED) or (
+                cell.get_connections()[dir]
                 or cell.get_neighbours()[dir] is None
             ):
                 closed_directions.remove(dir)
         if len(closed_directions) == 0:
             return
-        to_open = random.choice(closed_directions)
-        cell.set_connection(to_open)
-
-    def _biggus_roomus_violatus(self, cell: Cell) -> None:
-        """Violate the integrity of overly large rooms by raising a wall."""
-        north_neighbour = cell.get_neighbours()[Compass.NORTH]
-        east_neighbour = cell.get_neighbours()[Compass.EAST]
-        south_neighbour = cell.get_neighbours()[Compass.SOUTH]
-        west_neighbour = cell.get_neighbours()[Compass.WEST]
-        if (
-            cell
-            and north_neighbour
-            and east_neighbour
-            and south_neighbour
-            and west_neighbour
-        ) and (
-            all(cell.get_connections().values())
-            and north_neighbour.get_connections()[Compass.EAST] is True
-            and north_neighbour.get_connections()[Compass.WEST] is True
-            # and south_neighbour.get_connections()[Compass.EAST] is True
-            and south_neighbour.get_connections()[Compass.WEST] is True
-            and east_neighbour.get_connections()[Compass.NORTH] is True
-            and east_neighbour.get_connections()[Compass.SOUTH] is True
-            and west_neighbour.get_connections()[Compass.NORTH] is True
-            # and west_neighbour.get_connections()[Compass.SOUTH] is True
-        ):
-            print(
-                f"Cell neighours: {cell.get_connections()}",
-                f"\nNorth neighbour neigbours: {north_neighbour.get_connections()}",
-                f"\nWestNeighbours: {west_neighbour.get_connections()}",
-            )
-            direction = [d for d in Compass]
-            # cell.unset_connection(random.choice(direction))
-            cell.state = CellState.VISITING
+        for d in closed_directions:
+            neighbour = cell.get_neighbours()[d]
+            if (
+                neighbour
+                and neighbour.state == CellState.VISITED
+                and self._is_a_deadend(neighbour)
+            ):
+                cell.set_connection(d)
+                return
+        legitimate_directions = random.sample(
+            closed_directions, k=len(closed_directions)
+        )
+        for to_open in legitimate_directions:
+            cell.set_connection(to_open)
+            print(f"{to_open}--{cell.pos}--{cell.get_connections()}")
+            if not self._is_a_deadend(cell):
+                break
 
     def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
         """Check if the curent cell has any locked neighbours."""
@@ -313,7 +297,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         the afore-mentionned cell with one of its neighbour.
         """
         for cell in self.grid:
-            self._biggus_roomus_violatus(cell)
             if cell.state == CellState.LOCKED:
                 continue
             match cell.conns_to_decimal():
@@ -378,6 +361,34 @@ class ImperfectMazeGenerator(MazeGenerator):
         )
         self._dispatch_logical_split(corners, engine)
 
+    def _anihilate_large_rooms(self) -> None:
+        """I am loosing hope."""
+        for c in self.grid:
+            n_neighbour = c.get_neighbours()[Compass.NORTH]
+            e_neighbour = c.get_neighbours()[Compass.EAST]
+            s_neighbour = c.get_neighbours()[Compass.SOUTH]
+            w_neighbour = c.get_neighbours()[Compass.WEST]
+            if not (
+                n_neighbour and e_neighbour and s_neighbour and w_neighbour
+            ):
+                continue
+            if (
+                all(c.get_connections().values())
+                and n_neighbour.get_connections()[Compass.EAST]
+                and n_neighbour.get_connections()[Compass.WEST]
+                and s_neighbour.get_connections()[Compass.EAST]
+                and s_neighbour.get_connections()[Compass.WEST]
+                and e_neighbour.get_connections()[Compass.NORTH]
+                and e_neighbour.get_connections()[Compass.SOUTH]
+                and w_neighbour.get_connections()[Compass.NORTH]
+                and w_neighbour.get_connections()[Compass.SOUTH]
+            ):
+                c.state = CellState.VISITING
+                random_direction = random.choice(
+                    [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]
+                )
+                c.unset_connection(random_direction)
+
     @override
     def generate(self, engine: RenderEngine | None = None) -> None:
         """Generate an imperfect maze.
@@ -389,12 +400,13 @@ class ImperfectMazeGenerator(MazeGenerator):
         ----------
         engine: `RenderEngine`
             Passing this argument into the program allows to render the maze
-            step-by-
+            step-by-step
         """
         import time
 
         toki = time.time()
-        random.seed(1788134706.2530549)
+        # random.seed(1788182856.9606729)
+        random.seed(toki)
         print(f"seed: {toki}")
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
@@ -403,7 +415,11 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.EAST)
                 cell.set_connection(Compass.SOUTH)
                 cell.set_connection(Compass.WEST)
-        # if globals.config.seed is not None:
-        # random.seed(globals.config.seed)
+        if globals.config.seed is not None:
+            random.seed(globals.config.seed)
         self._imperfect_generation(engine=engine)
         self._eliminate_deadends()
+        self._anihilate_large_rooms()
+        for c in self.grid:
+            if self._is_a_deadend(c):
+                c.state = CellState.VISITING
