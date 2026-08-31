@@ -16,29 +16,31 @@ from .cell import Cell
 class ImperfectMazeGenerator(MazeGenerator):
     """Imperfect maze generator class."""
 
+    def _find_large_rooms(self, cell: Cell) -> bool:
+        n_neighbour = cell.get_neighbours()[Compass.NORTH]
+        e_neighbour = cell.get_neighbours()[Compass.EAST]
+        s_neighbour = cell.get_neighbours()[Compass.SOUTH]
+        w_neighbour = cell.get_neighbours()[Compass.WEST]
+        if not (n_neighbour and e_neighbour and s_neighbour and w_neighbour):
+            return False
+        if (
+            all(cell.get_connections().values())
+            and n_neighbour.get_connections()[Compass.EAST]
+            and n_neighbour.get_connections()[Compass.WEST]
+            and s_neighbour.get_connections()[Compass.EAST]
+            and s_neighbour.get_connections()[Compass.WEST]
+            and e_neighbour.get_connections()[Compass.NORTH]
+            and e_neighbour.get_connections()[Compass.SOUTH]
+            and w_neighbour.get_connections()[Compass.NORTH]
+            and w_neighbour.get_connections()[Compass.SOUTH]
+        ):
+            return True
+        return False
+
     def _anihilate_large_rooms(self) -> None:
         """I am loosing hope."""
         for c in self.grid:
-            n_neighbour = c.get_neighbours()[Compass.NORTH]
-            e_neighbour = c.get_neighbours()[Compass.EAST]
-            s_neighbour = c.get_neighbours()[Compass.SOUTH]
-            w_neighbour = c.get_neighbours()[Compass.WEST]
-            if not (
-                n_neighbour and e_neighbour and s_neighbour and w_neighbour
-            ):
-                continue
-            if (
-                all(c.get_connections().values())
-                and n_neighbour.get_connections()[Compass.EAST]
-                and n_neighbour.get_connections()[Compass.WEST]
-                and s_neighbour.get_connections()[Compass.EAST]
-                and s_neighbour.get_connections()[Compass.WEST]
-                and e_neighbour.get_connections()[Compass.NORTH]
-                and e_neighbour.get_connections()[Compass.SOUTH]
-                and w_neighbour.get_connections()[Compass.NORTH]
-                and w_neighbour.get_connections()[Compass.SOUTH]
-            ):
-                c.state = CellState.VISITING
+            if self._find_large_rooms(c):
                 random_direction = random.choice(
                     [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]
                 )
@@ -110,7 +112,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             if not self._is_a_deadend(cell):
                 break
 
-    def _eliminate_deadends(self) -> None:
+    def _eliminate_deadends(self, engine: RenderEngine | None) -> None:
         """Destroy dead ends by randomly hollowing walls.
 
         This method targets cells with only one connection and tries to connect
@@ -166,6 +168,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                             Compass.WEST,
                         ]
                         self._open_closed_path(cell, closed_directions)
+            self._render_progress(engine)
 
     def _define_horizontal_areas(
         self, original_corners: dict[str, Point], starting_cell: Cell
@@ -238,6 +241,14 @@ class ImperfectMazeGenerator(MazeGenerator):
         )
         return left_area, right_area
 
+    def _render_progress(self, engine: RenderEngine | None) -> None:
+        """."""
+        if engine is not None:
+            _ = stdout.write("\033[H")
+            _ = stdout.flush()
+            engine.render()
+            sleep(globals.config.delay)
+
     def _horizontal_split(
         self,
         area_corners: dict[str, Point],
@@ -274,11 +285,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                     segment_cells = []
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            if engine is not None:
-                _ = stdout.write("\033[H")
-                _ = stdout.flush()
-                engine.render()
-                sleep(globals.config.delay)
+            self._render_progress(engine)
 
         if len(segment_cells) > 0:
             segments.append(segment_cells)
@@ -287,14 +294,11 @@ class ImperfectMazeGenerator(MazeGenerator):
             random_sample = random.sample(segment_cells, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
+                self._render_progress(engine)
         upper_area, lower_area = self._define_horizontal_areas(
             area_corners, starting_cell
         )
-        if engine is not None:
-            _ = stdout.write("\033[H")
-            _ = stdout.flush()
-            engine.render()
-            sleep(globals.config.delay)
+        self._render_progress(engine)
         self._dispatch_logical_split(upper_area, engine)
         self._dispatch_logical_split(lower_area, engine)
 
@@ -336,11 +340,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                     segment_cells = []
                 next_cell.unset_connection(direction_to_unset)
             next_cell = next_cell.get_neighbours()[direction]
-            if engine is not None:
-                _ = stdout.write("\033[H")
-                _ = stdout.flush()
-                engine.render()
-                sleep(globals.config.delay)
+            self._render_progress(engine)
 
         if len(segment_cells) > 0:
             segments.append(segment_cells)
@@ -349,14 +349,11 @@ class ImperfectMazeGenerator(MazeGenerator):
             random_sample = random.sample(segment_cells, k=max(1, path_number))
             for cell in random_sample:
                 cell.set_connection(direction_to_unset)
+                self._render_progress(engine)
         left_area, right_area = self._define_vertical_areas(
             area_corners, starting_cell
         )
-        if engine is not None:
-            _ = stdout.write("\033[H")
-            _ = stdout.flush()
-            engine.render()
-            sleep(globals.config.delay)
+        self._render_progress(engine)
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
@@ -412,8 +409,5 @@ class ImperfectMazeGenerator(MazeGenerator):
         if globals.config.seed is not None:
             random.seed(globals.config.seed)
         self._imperfect_generation(engine=engine)
-        self._eliminate_deadends()
+        self._eliminate_deadends(engine=engine)
         self._anihilate_large_rooms()
-        for c in self.grid:
-            if self._is_a_deadend(c):
-                c.state = CellState.VISITING
