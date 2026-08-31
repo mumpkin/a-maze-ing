@@ -16,20 +16,156 @@ from .cell import Cell
 class ImperfectMazeGenerator(MazeGenerator):
     """Imperfect maze generator class."""
 
-    def _dispatch_logical_split(
-        self, area: dict[str, Point], engine: RenderEngine | None
-    ) -> None:
-        """Select which split to perform next.
+    def _anihilate_large_rooms(self) -> None:
+        """I am loosing hope."""
+        for c in self.grid:
+            n_neighbour = c.get_neighbours()[Compass.NORTH]
+            e_neighbour = c.get_neighbours()[Compass.EAST]
+            s_neighbour = c.get_neighbours()[Compass.SOUTH]
+            w_neighbour = c.get_neighbours()[Compass.WEST]
+            if not (
+                n_neighbour and e_neighbour and s_neighbour and w_neighbour
+            ):
+                continue
+            if (
+                all(c.get_connections().values())
+                and n_neighbour.get_connections()[Compass.EAST]
+                and n_neighbour.get_connections()[Compass.WEST]
+                and s_neighbour.get_connections()[Compass.EAST]
+                and s_neighbour.get_connections()[Compass.WEST]
+                and e_neighbour.get_connections()[Compass.NORTH]
+                and e_neighbour.get_connections()[Compass.SOUTH]
+                and w_neighbour.get_connections()[Compass.NORTH]
+                and w_neighbour.get_connections()[Compass.SOUTH]
+            ):
+                c.state = CellState.VISITING
+                random_direction = random.choice(
+                    [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]
+                )
+                c.unset_connection(random_direction)
 
-        If the areas width is higher than its width, split vertically.
-        Otherwise split horizontally.
+    def _is_a_deadend(self, cell: Cell) -> bool:
+        """Check if the cell passed in argument is a dead end."""
+        match cell.conns_to_decimal():
+            case 0:
+                return True
+            case 1:
+                return True
+            case 2:
+                return True
+            case 4:
+                return True
+            case 8:
+                return True
+            case _:
+                return False
+
+    def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
+        """Check if the curent cell has any locked neighbours."""
+        neighbours = cell.get_neighbours()
+        for _, v in neighbours.items():
+            if v and v.state == CellState.LOCKED:
+                return True
+        return False
+
+    def _open_closed_path(
+        self,
+        cell: Cell,
+        closed_directions: list[Compass],
+    ) -> None:
+        """Open a random wall if a cell is considered a dead end.
+
+        Parameters
+        ----------
+        cell: Cell
+            A cell from the grid presenting a dead end.
+        closed_directions: list[Compass]
+            A list containing the possibly valid directions towards neighbours
+            of the current cell to create a new path
         """
-        width = area["top-right"].x - area["top-left"].x
-        height = area["bottom-left"].y - area["top-left"].y
-        if width > height:
-            self._vertical_split(area, Compass.SOUTH, engine)
-        else:
-            self._horizontal_split(area, Compass.EAST, engine)
+        for dir in closed_directions:
+            neighbour = cell.get_neighbours()[dir]
+            if (neighbour and neighbour.state == CellState.LOCKED) or (
+                cell.get_connections()[dir]
+                or cell.get_neighbours()[dir] is None
+            ):
+                closed_directions.remove(dir)
+        if len(closed_directions) == 0:
+            return
+        for d in closed_directions:
+            neighbour = cell.get_neighbours()[d]
+            if (
+                neighbour
+                and neighbour.state == CellState.VISITED
+                and self._is_a_deadend(neighbour)
+            ):
+                cell.set_connection(d)
+                return
+        legitimate_directions = random.sample(
+            closed_directions, k=len(closed_directions)
+        )
+        for to_open in legitimate_directions:
+            cell.set_connection(to_open)
+            print(f"{to_open}--{cell.pos}--{cell.get_connections()}")
+            if not self._is_a_deadend(cell):
+                break
+
+    def _eliminate_deadends(self) -> None:
+        """Destroy dead ends by randomly hollowing walls.
+
+        This method targets cells with only one connection and tries to connect
+        the afore-mentionned cell with one of its neighbour.
+        """
+        for cell in self.grid:
+            if cell.state == CellState.LOCKED:
+                continue
+            match cell.conns_to_decimal():
+                case 8:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.SOUTH,
+                    ]
+                    self._open_closed_path(cell, closed_directions)
+                case 4:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(cell, closed_directions)
+                case 2:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(cell, closed_directions)
+                case 1:
+                    closed_directions = [
+                        Compass.EAST,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(cell, closed_directions)
+                case 0:
+                    closed_directions = [
+                        Compass.NORTH,
+                        Compass.EAST,
+                        Compass.SOUTH,
+                        Compass.WEST,
+                    ]
+                    self._open_closed_path(cell, closed_directions)
+                    self._open_closed_path(cell, closed_directions)
+                case _:
+                    if self._does_cell_have_locked_neighbour(cell):
+                        closed_directions = [
+                            Compass.NORTH,
+                            Compass.EAST,
+                            Compass.SOUTH,
+                            Compass.WEST,
+                        ]
+                        self._open_closed_path(cell, closed_directions)
 
     def _define_horizontal_areas(
         self, original_corners: dict[str, Point], starting_cell: Cell
@@ -224,128 +360,20 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._dispatch_logical_split(left_area, engine)
         self._dispatch_logical_split(right_area, engine)
 
-    def _is_a_deadend(self, cell: Cell) -> bool:
-        """Check if the cell passed in argument is a dead end."""
-        match cell.conns_to_decimal():
-            case 0:
-                return True
-            case 1:
-                return True
-            case 2:
-                return True
-            case 4:
-                return True
-            case 8:
-                return True
-            case _:
-                return False
-
-    def _open_closed_path(
-        self,
-        cell: Cell,
-        closed_directions: list[Compass],
+    def _dispatch_logical_split(
+        self, area: dict[str, Point], engine: RenderEngine | None
     ) -> None:
-        """Open a random wall if a cell is considered a dead end.
+        """Select which split to perform next.
 
-        Parameters
-        ----------
-        cell: Cell
-            A cell from the grid presenting a dead end.
-        closed_directions: list[Compass]
-            A list containing the possibly valid directions towards neighbours
-            of the current cell to create a new path
+        If the areas width is higher than its width, split vertically.
+        Otherwise split horizontally.
         """
-        for dir in closed_directions:
-            neighbour = cell.get_neighbours()[dir]
-            if (neighbour and neighbour.state == CellState.LOCKED) or (
-                cell.get_connections()[dir]
-                or cell.get_neighbours()[dir] is None
-            ):
-                closed_directions.remove(dir)
-        if len(closed_directions) == 0:
-            return
-        for d in closed_directions:
-            neighbour = cell.get_neighbours()[d]
-            if (
-                neighbour
-                and neighbour.state == CellState.VISITED
-                and self._is_a_deadend(neighbour)
-            ):
-                cell.set_connection(d)
-                return
-        legitimate_directions = random.sample(
-            closed_directions, k=len(closed_directions)
-        )
-        for to_open in legitimate_directions:
-            cell.set_connection(to_open)
-            print(f"{to_open}--{cell.pos}--{cell.get_connections()}")
-            if not self._is_a_deadend(cell):
-                break
-
-    def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
-        """Check if the curent cell has any locked neighbours."""
-        neighbours = cell.get_neighbours()
-        for _, v in neighbours.items():
-            if v and v.state == CellState.LOCKED:
-                return True
-        return False
-
-    def _eliminate_deadends(self) -> None:
-        """Destroy dead ends by randomly hollowing walls.
-
-        This method targets cells with only one connection and tries to connect
-        the afore-mentionned cell with one of its neighbour.
-        """
-        for cell in self.grid:
-            if cell.state == CellState.LOCKED:
-                continue
-            match cell.conns_to_decimal():
-                case 8:
-                    closed_directions = [
-                        Compass.NORTH,
-                        Compass.EAST,
-                        Compass.SOUTH,
-                    ]
-                    self._open_closed_path(cell, closed_directions)
-                case 4:
-                    closed_directions = [
-                        Compass.NORTH,
-                        Compass.EAST,
-                        Compass.WEST,
-                    ]
-                    self._open_closed_path(cell, closed_directions)
-                case 2:
-                    closed_directions = [
-                        Compass.NORTH,
-                        Compass.SOUTH,
-                        Compass.WEST,
-                    ]
-                    self._open_closed_path(cell, closed_directions)
-                case 1:
-                    closed_directions = [
-                        Compass.EAST,
-                        Compass.SOUTH,
-                        Compass.WEST,
-                    ]
-                    self._open_closed_path(cell, closed_directions)
-                case 0:
-                    closed_directions = [
-                        Compass.NORTH,
-                        Compass.EAST,
-                        Compass.SOUTH,
-                        Compass.WEST,
-                    ]
-                    self._open_closed_path(cell, closed_directions)
-                    self._open_closed_path(cell, closed_directions)
-                case _:
-                    if self._does_cell_have_locked_neighbour(cell):
-                        closed_directions = [
-                            Compass.NORTH,
-                            Compass.EAST,
-                            Compass.SOUTH,
-                            Compass.WEST,
-                        ]
-                        self._open_closed_path(cell, closed_directions)
+        width = area["top-right"].x - area["top-left"].x
+        height = area["bottom-left"].y - area["top-left"].y
+        if width > height:
+            self._vertical_split(area, Compass.SOUTH, engine)
+        else:
+            self._horizontal_split(area, Compass.EAST, engine)
 
     def _imperfect_generation(self, engine: RenderEngine | None) -> None:
         """Perform the creation of the maze."""
@@ -361,34 +389,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         )
         self._dispatch_logical_split(corners, engine)
 
-    def _anihilate_large_rooms(self) -> None:
-        """I am loosing hope."""
-        for c in self.grid:
-            n_neighbour = c.get_neighbours()[Compass.NORTH]
-            e_neighbour = c.get_neighbours()[Compass.EAST]
-            s_neighbour = c.get_neighbours()[Compass.SOUTH]
-            w_neighbour = c.get_neighbours()[Compass.WEST]
-            if not (
-                n_neighbour and e_neighbour and s_neighbour and w_neighbour
-            ):
-                continue
-            if (
-                all(c.get_connections().values())
-                and n_neighbour.get_connections()[Compass.EAST]
-                and n_neighbour.get_connections()[Compass.WEST]
-                and s_neighbour.get_connections()[Compass.EAST]
-                and s_neighbour.get_connections()[Compass.WEST]
-                and e_neighbour.get_connections()[Compass.NORTH]
-                and e_neighbour.get_connections()[Compass.SOUTH]
-                and w_neighbour.get_connections()[Compass.NORTH]
-                and w_neighbour.get_connections()[Compass.SOUTH]
-            ):
-                c.state = CellState.VISITING
-                random_direction = random.choice(
-                    [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]
-                )
-                c.unset_connection(random_direction)
-
     @override
     def generate(self, engine: RenderEngine | None = None) -> None:
         """Generate an imperfect maze.
@@ -402,12 +402,6 @@ class ImperfectMazeGenerator(MazeGenerator):
             Passing this argument into the program allows to render the maze
             step-by-step
         """
-        import time
-
-        toki = time.time()
-        # random.seed(1788182856.9606729)
-        random.seed(toki)
-        print(f"seed: {toki}")
         for cell in self.grid:
             if cell.state != CellState.LOCKED:
                 cell.state = CellState.VISITED
