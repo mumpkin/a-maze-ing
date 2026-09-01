@@ -17,6 +17,13 @@ class ImperfectMazeGenerator(MazeGenerator):
     """Imperfect maze generator class."""
 
     def _find_large_rooms(self, cell: Cell) -> bool:
+        """Check if the current cell is at the center of a 3x3 room.
+
+        Parameters
+        ----------
+        cell: `Cell`
+            The cell we want to check for being the center of a 3x3 open space.
+        """
         n_neighbour = cell.get_neighbours()[Compass.NORTH]
         e_neighbour = cell.get_neighbours()[Compass.EAST]
         s_neighbour = cell.get_neighbours()[Compass.SOUTH]
@@ -38,7 +45,7 @@ class ImperfectMazeGenerator(MazeGenerator):
         return False
 
     def _anihilate_large_rooms(self) -> None:
-        """I am loosing hope."""
+        """I was loosing hope."""
         for c in self.grid:
             if self._find_large_rooms(c):
                 random_direction = random.choice(
@@ -47,7 +54,13 @@ class ImperfectMazeGenerator(MazeGenerator):
                 c.unset_connection(random_direction)
 
     def _is_a_deadend(self, cell: Cell) -> bool:
-        """Check if the cell passed in argument is a dead end."""
+        """Check if the cell passed in argument is a dead end.
+
+        Parameters
+        ----------
+        cell: `Cell`
+            The cell we want to check for being a dead end.
+        """
         match cell.conns_to_decimal():
             case 0:
                 return True
@@ -63,7 +76,13 @@ class ImperfectMazeGenerator(MazeGenerator):
                 return False
 
     def _does_cell_have_locked_neighbour(self, cell: Cell) -> bool:
-        """Check if the curent cell has any locked neighbours."""
+        """Check if the curent cell has any locked neighbours.
+
+        Parameters
+        ----------
+        cell: `Cell`
+            The cell whose neighbours we want to check the states.
+        """
         neighbours = cell.get_neighbours()
         for _, v in neighbours.items():
             if v and v.state == CellState.LOCKED:
@@ -79,9 +98,9 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        cell: Cell
+        cell: `Cell`
             A cell from the grid presenting a dead end.
-        closed_directions: list[Compass]
+        closed_directions: `list[Compass]`
             A list containing the possibly valid directions towards neighbours
             of the current cell to create a new path
         """
@@ -117,6 +136,12 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         This method targets cells with only one connection and tries to connect
         the afore-mentionned cell with one of its neighbour.
+
+        Parameters
+        ----------
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
         """
         for cell in self.grid:
             if cell.state == CellState.LOCKED:
@@ -171,20 +196,28 @@ class ImperfectMazeGenerator(MazeGenerator):
             self._render_progress(engine)
 
     def _define_horizontal_areas(
-        self, original_corners: dict[str, Point], starting_cell: Cell
+        self, original_area: dict[str, Point], starting_cell: Cell
     ) -> tuple[dict[str, Point], dict[str, Point]]:
-        """Return the up and down area after performing a vertical split."""
+        """Return the upper and lower areas after a horizontal split.
+
+        Parameters
+        ----------
+        original_area: `dict[str, Point]`
+            The area that is split into two parts by a horizontal line
+        starting_cell: `Cell`
+            The cell from wich we began splitting the previous area
+        """
         upper_area: dict[str, Point] = dict(
             {
                 "top-left": Point(
-                    x=starting_cell.pos.x, y=original_corners["top-left"].y
+                    x=starting_cell.pos.x, y=original_area["top-left"].y
                 ),
                 "top-right": Point(
-                    x=original_corners["top-right"].x,
-                    y=original_corners["top-right"].y,
+                    x=original_area["top-right"].x,
+                    y=original_area["top-right"].y,
                 ),
                 "bottom-left": Point(
-                    original_corners["bottom-left"].x,
+                    original_area["bottom-left"].x,
                     y=starting_cell.pos.y - 1,
                 ),
                 "bottom-right": Point(
@@ -196,53 +229,68 @@ class ImperfectMazeGenerator(MazeGenerator):
         lower_area: dict[str, Point] = dict(
             {
                 "top-left": Point(
-                    x=original_corners["top-left"].x, y=starting_cell.pos.y
+                    x=original_area["top-left"].x, y=starting_cell.pos.y
                 ),
                 "top-right": Point(
-                    x=original_corners["top-right"].x, y=starting_cell.pos.y
+                    x=original_area["top-right"].x, y=starting_cell.pos.y
                 ),
                 "bottom-left": Point(
                     x=starting_cell.pos.x,
-                    y=original_corners["bottom-left"].y,
+                    y=original_area["bottom-left"].y,
                 ),
-                "bottom-right": original_corners["bottom-right"],
+                "bottom-right": original_area["bottom-right"],
             }
         )
         return upper_area, lower_area
 
     def _define_vertical_areas(
-        self, original_corners: dict[str, Point], starting_cell: Cell
+        self, original_area: dict[str, Point], starting_cell: Cell
     ) -> tuple[dict[str, Point], dict[str, Point]]:
-        """Return the left and right area after performing a vertical split."""
+        """Return the upper and lower areas after a vertical split.
+
+        Parameters
+        ----------
+        original_area: `dict[str, Point]`
+            The area that is split into two parts by a vertical line
+        starting_cell: `Cell`
+            The cell from wich we began splitting the previous area
+        """
         left_area: dict[str, Point] = dict(
             {
-                "top-left": original_corners["top-left"],
+                "top-left": original_area["top-left"],
                 "top-right": Point(
-                    x=starting_cell.pos.x, y=original_corners["top-right"].y
+                    x=starting_cell.pos.x, y=original_area["top-right"].y
                 ),
-                "bottom-left": original_corners["bottom-left"],
+                "bottom-left": original_area["bottom-left"],
                 "bottom-right": Point(
-                    x=starting_cell.pos.x, y=original_corners["bottom-right"].y
+                    x=starting_cell.pos.x, y=original_area["bottom-right"].y
                 ),
             }
         )
         right_area: dict[str, Point] = dict(
             {
                 "top-left": Point(
-                    x=starting_cell.pos.x + 1, y=original_corners["top-left"].y
+                    x=starting_cell.pos.x + 1, y=original_area["top-left"].y
                 ),
-                "top-right": original_corners["top-right"],
+                "top-right": original_area["top-right"],
                 "bottom-left": Point(
                     x=starting_cell.pos.x + 1,
-                    y=original_corners["bottom-left"].y,
+                    y=original_area["bottom-left"].y,
                 ),
-                "bottom-right": original_corners["bottom-right"],
+                "bottom-right": original_area["bottom-right"],
             }
         )
         return left_area, right_area
 
     def _render_progress(self, engine: RenderEngine | None) -> None:
-        """."""
+        """Display the progress in creating the maze in the terminal.
+
+        Parameters
+        ----------
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
+        """
         if engine is not None:
             _ = stdout.write("\033[H")
             _ = stdout.flush()
@@ -255,7 +303,19 @@ class ImperfectMazeGenerator(MazeGenerator):
         direction: Compass,
         engine: RenderEngine | None,
     ) -> None:
-        """Split horizontally the given area."""
+        """Split horizontally the given area.
+
+        Parameters
+        ----------
+        area: `dict[str, Point]`
+            The area delimited by four coordinates from wich to create the
+            next section
+        direction: `Compass`
+            Direction in wich the maze will be built
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
+        """
         if (
             area_corners["bottom-left"].y - area_corners["top-left"].y < 1
             or area_corners["top-right"].x - area_corners["top-left"].x < 1
@@ -304,28 +364,38 @@ class ImperfectMazeGenerator(MazeGenerator):
 
     def _vertical_split(
         self,
-        area_corners: dict[str, Point],
+        area: dict[str, Point],
         direction: Compass,
         engine: RenderEngine | None,
     ) -> None:
-        """Split vertically the given area."""
+        """Split vertically the given area.
+
+        Parameters
+        ----------
+        area: `dict[str, Point]`
+            The area delimited by four coordinates from wich to create the
+            next section
+        direction: `Compass`
+            Direction in wich the maze will be built
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
+        """
         if (
-            area_corners["bottom-left"].y - area_corners["top-left"].y < 1
-            or area_corners["top-right"].x - area_corners["top-left"].x < 1
+            area["bottom-left"].y - area["top-left"].y < 1
+            or area["top-right"].x - area["top-left"].x < 1
         ):
             return
         starting_cell: Cell = self.grid[
-            random.randint(
-                area_corners["top-left"].x + 1, area_corners["top-right"].x - 1
-            )
-            + area_corners["top-left"].y * globals.config.width
+            random.randint(area["top-left"].x + 1, area["top-right"].x - 1)
+            + area["top-left"].y * globals.config.width
         ]
         next_cell: Cell | None = starting_cell
         direction_to_unset: Compass = Compass.EAST
         segments: list[list[Cell]] = []
         segment_cells: list[Cell] = []
 
-        while next_cell and next_cell.pos.y <= area_corners["bottom-left"].y:
+        while next_cell and next_cell.pos.y <= area["bottom-left"].y:
             if not (
                 next_cell.pos == globals.config.entry
                 or next_cell.pos == globals.config.exit
@@ -351,7 +421,7 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(direction_to_unset)
                 self._render_progress(engine)
         left_area, right_area = self._define_vertical_areas(
-            area_corners, starting_cell
+            area, starting_cell
         )
         self._render_progress(engine)
         self._dispatch_logical_split(left_area, engine)
@@ -364,6 +434,15 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         If the areas width is higher than its width, split vertically.
         Otherwise split horizontally.
+
+        Parameters
+        ----------
+        area: `dict[str, Point]`
+            The area delimited by four coordinates from wich to create the
+            next section
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
         """
         width = area["top-right"].x - area["top-left"].x
         height = area["bottom-left"].y - area["top-left"].y
@@ -373,7 +452,14 @@ class ImperfectMazeGenerator(MazeGenerator):
             self._horizontal_split(area, Compass.EAST, engine)
 
     def _imperfect_generation(self, engine: RenderEngine | None) -> None:
-        """Perform the creation of the maze."""
+        """Perform the creation of the maze.
+
+        Parameters
+        ----------
+        engine: `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
+        """
         corners = dict(
             {
                 "top-left": Point(x=0, y=0),
