@@ -127,7 +127,6 @@ class ImperfectMazeGenerator(MazeGenerator):
         )
         for to_open in legitimate_directions:
             cell.set_connection(to_open)
-            print(f"{to_open}--{cell.pos}--{cell.get_connections()}")
             if not self._is_a_deadend(cell):
                 break
 

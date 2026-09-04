@@ -1,6 +1,5 @@
 """Cell definition."""
 
-import json
 import random
 from typing import Self
 
@@ -27,16 +26,19 @@ class Cell:
             Compass.WEST: False,
         }
 
-    def toJSON(self) -> str:
-        """."""
-        return json.dumps({**self.pos.__dict__, "state": self.state.value})
-
     def _validate_neighbouring(self, cell: Self) -> Compass | None:
         """
         Return a Compass direction if neighbouring_cell is.
 
-        Keyword parameter:
-        cell: Cell -- Cell to validate and to get compass direction.
+        Parameters
+        ----------
+        cell: `Cell`
+            Cell to check wheter it is a neighbour to the current cell
+
+        Return
+        ---------
+        If the Cell object passed in argument is a neighbour,
+        return its direction as a `Compass`, otherwise `None`
         """
         diff_x = self.pos.x - cell.pos.x
         diff_y = self.pos.y - cell.pos.y
@@ -53,7 +55,13 @@ class Cell:
         return None
 
     def get_random_neighbour(self) -> tuple[Compass, Self]:
-        """Return a cell that neighbouring the current cell."""
+        """Return a cell in the neighbouring of the current cell.
+
+        Return
+        ---------
+        A `tuple` containing the direction of the neighbour along with
+        the neighbour itself
+        """
         neighbours: list[tuple[Compass, Self]] = [
             (c, n) for c, n in self._neighbours.items() if n is not None
         ]
@@ -61,30 +69,45 @@ class Cell:
         return random.choice(neighbours)
 
     def get_neighbours(self) -> dict[Compass, Self | None]:
-        """Return the direct cell neighbours list."""
+        """Return the current cell's neighbours list.
+
+        Return
+        ----------
+        A `dictionnary` containing all neighbours of the current cell
+        """
         return self._neighbours
 
     def add_neighbour(self, cell: Self) -> None:
         """
         Add a new valid cell as self neighbour.
 
-        Keyword parameters:
-        cell: Cell -- Cell to add as neighbour if its position is valid.
+        Parameters
+        ----------
+        cell: `Cell`
+            Cell to add as neighbour to the current cell
+            if its position is valid.
         """
         compass_dir = self._validate_neighbouring(cell)
         if compass_dir:
             self._neighbours[compass_dir] = cell
 
     def get_connections(self) -> dict[Compass, bool]:
-        """Return the list of cells connected to this one."""
+        """Return the connectivity status between all neighbours to this cell.
+
+        Return
+        ----------
+        A `dictionnary` containing four pairs of `Compass` : `bool`, the `bool`
+        being the opening status in the direction pointed by `Compass`
+        """
         return self._connections
 
     def set_connection(self, direction: Compass) -> None:
-        """
-        Connect the given cell to the cell in the specified direction.
+        """Connect the current cell to the cell in the specified direction.
 
-        Keyword parameters:
-        dir: Compass -- Compass direction to set to `True`.
+        Parameters
+        ----------
+        direction: `Compass`
+            Compass direction to set to `True`.
         """
         neighbour = self._neighbours[direction]
         if neighbour and neighbour.state != CellState.LOCKED:
@@ -93,12 +116,18 @@ class Cell:
                 if val == self:
                     neighbour._connections[dir] = True
 
-    def unset_connection(self, direction: Compass) -> None:
-        """
-        Remove the connection to the given direction.
+    def set_all_connections(self) -> None:
+        """Connect all neighbours to the current cell."""
+        for c in [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]:
+            self.set_connection(c)
 
-        Keyword parameters:
-        dir: Compass -- Compass direction to set to `True`.
+    def unset_connection(self, direction: Compass) -> None:
+        """Disconnect the current cell to the cell in the given direction.
+
+        Parameters
+        ----------
+        direction: `Compass`
+            Compass direction to set to `False`.
         """
         neighbour = self._neighbours[direction]
         if neighbour and neighbour.state != CellState.LOCKED:
@@ -108,15 +137,27 @@ class Cell:
                     neighbour._connections[dir] = False
 
     def unset_all_connections(self) -> None:
-        """Remove all connections linked to the current cell in both ways."""
+        """Remove all connections bound to the current cell."""
         for c in [Compass.NORTH, Compass.EAST, Compass.SOUTH, Compass.WEST]:
             self.unset_connection(c)
 
     def conns_to_decimal(self) -> int:
-        """Return the decimal value related to the cell connections."""
+        """Return the decimal value related to the cell connections.
+
+        Return
+        ----------
+        A `int` ranging from 0 to 15 depending on the connections
+        bound to the current cell
+        """
         return sum([k.value for k, v in self._connections.items() if v])
 
     def conns_to_hexa(self) -> str:
-        """Return the hexadecimal value related to the cell connections."""
+        """Return the hexadecimal value related to the cell connections.
+
+        Return
+        ----------
+        A `str` representing a hexadecimal number depending on the connections
+        bound to the current cell
+        """
         decimal_value = self.conns_to_decimal()
-        return hex(decimal_value).removeprefix("0x").upper()
+        return hex(15 - decimal_value).removeprefix("0x").upper()
