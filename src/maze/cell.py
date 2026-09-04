@@ -35,8 +35,8 @@ class Cell:
         cell: `Cell`
             Cell to check wheter it is a neighbour to the current cell
 
-        Return
-        ---------
+        Returns
+        -------
         If the Cell object passed in argument is a neighbour,
         return its direction as a `Compass`, otherwise `None`
         """
@@ -57,8 +57,8 @@ class Cell:
     def get_random_neighbour(self) -> tuple[Compass, Self]:
         """Return a cell in the neighbouring of the current cell.
 
-        Return
-        ---------
+        Returns
+        -------
         A `tuple` containing the direction of the neighbour along with
         the neighbour itself
         """
@@ -71,8 +71,8 @@ class Cell:
     def get_neighbours(self) -> dict[Compass, Self | None]:
         """Return the current cell's neighbours list.
 
-        Return
-        ----------
+        Returns
+        -------
         A `dictionnary` containing all neighbours of the current cell
         """
         return self._neighbours
@@ -94,8 +94,8 @@ class Cell:
     def get_connections(self) -> dict[Compass, bool]:
         """Return the connectivity status between all neighbours to this cell.
 
-        Return
-        ----------
+        Returns
+        -------
         A `dictionnary` containing four pairs of `Compass` : `bool`, the `bool`
         being the opening status in the direction pointed by `Compass`
         """
@@ -144,8 +144,8 @@ class Cell:
     def conns_to_decimal(self) -> int:
         """Return the decimal value related to the cell connections.
 
-        Return
-        ----------
+        Returns
+        -------
         A `int` ranging from 0 to 15 depending on the connections
         bound to the current cell
         """
@@ -154,8 +154,8 @@ class Cell:
     def conns_to_hexa(self) -> str:
         """Return the hexadecimal value related to the cell connections.
 
-        Return
-        ----------
+        Returns
+        -------
         A `str` representing a hexadecimal number depending on the connections
         bound to the current cell
         """
