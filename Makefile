@@ -42,4 +42,4 @@ debug: $(VENV)
 	. ./$(VENV)/bin/activate
 	$(PM) run $(PY) -m pdb src/a_maze_ing.py
 
-.PHONY: install all source run clean debug lint lint-strict
+.PHONY: install all run clean debug lint lint-strict

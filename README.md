@@ -16,12 +16,30 @@ There are two types of mazes: `Perfect` and `Imperfect`.
 
 Clone the git repository.
 ```sh
-git clone <url> <directory>
+git clone <url> <directory> && \
+cd <directory>
 ```
-Move to the directory and run make command
+Move to the directory and run make command:
 ```sh
-cd <directory> && make
+# That command run `make install` and `make run` rules
+make
 ```
+or if you want to run the program with debugger:
+```sh
+make install
+make debug
+```
+
+### Available Makefile rules
+
+| Command | Description | 
+| --- | --- |
+| `make install` | Install all dependencies |
+| `make run` | Run a-maze-ing |
+| `make debug` | Run a-maze-ing in debug mode |
+| `make clean` | Delete all cache files and folders |
+| `make lint` | Check code style |
+| `make lint-strict` | Check code style but strict |
 
 ### Use the program
 
@@ -73,11 +91,22 @@ Press to:
 - `t`: open [Title](#title) selection menu. 
 
 ### Reusable code
-Tout because on are les goat.
-et everything parcequ'we somme the meilleurs.
 
-# Sources
+*Be you, be proud of you because you can be do what we want to do.*
+
+We've build our project to be modulable and easily reusable. So all the project.
+
+## Team organisation
+
+- ORGANIzATION, we have a Trello. 
+![TRELLOOOOOOO](./assets/trello.png)
+
+We use Pull Request and GitHub action to not provide, shitty code in the main branch.
+
 ## Resources
-### Rereources
-#### Rerereources
-##### Rererereources
+
+- To find and understand algorithms we used this [Maze Algorithms](https://professor-l.github.io/mazes/) article by [professor-l](https://github.com/professor-l/)
+
+### AI Usage
+
+- No code generation, but use as documentation, some times.
