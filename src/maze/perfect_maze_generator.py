@@ -17,39 +17,19 @@ from . import MazeGenerator
 class PerfectMazeGenerator(MazeGenerator):
     """Perfect maze generator."""
 
-    def _is_maze_generated(self) -> bool:
-        """Check if the maze is completely generated."""
-        for cell in self.grid:
-            match cell.state:
-                case CellState.VISITED | CellState.LOCKED:
-                    continue
-                case _:
-                    return False
-        return True
-
-    def _connect_visiting(self, visiting: list[Cell]) -> None:
-        """
-        Connect all visiting cell together.
-
-        Keyword parameters:
-        visitings: list[Cell] -- Cells that search the next visited cell.
-        """
-        for index, cell in enumerate(visiting[:-1]):
-            for dir, neig in cell.get_neighbours().items():
-                if visiting[index + 1] == neig:
-                    match dir:
-                        case Compass.NORTH:
-                            cell.set_connection(Compass.NORTH)
-                        case Compass.EAST:
-                            cell.set_connection(Compass.EAST)
-                        case Compass.SOUTH:
-                            cell.set_connection(Compass.SOUTH)
-                        case Compass.WEST:
-                            cell.set_connection(Compass.WEST)
-
     @override
     def generate(self, engine: utils.RenderEngine | None = None) -> None:
-        """Generate the maze."""
+        """Generate an imperfect maze.
+
+        The generation follows a inspired logic from the
+        recursive division algorithm.
+
+        Parameters
+        ----------
+        engine : `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
+        """
         random.seed(globals.config.seed) if globals.config.seed else None
         _ = subprocess.run(["clear"])
         visiting: list[Cell] = [
@@ -91,3 +71,33 @@ class PerfectMazeGenerator(MazeGenerator):
                 _ = stdout.flush()
                 engine.render()
                 sleep(globals.config.delay)
+
+    def _is_maze_generated(self) -> bool:
+        """Check if the maze is completely generated."""
+        for cell in self.grid:
+            match cell.state:
+                case CellState.VISITED | CellState.LOCKED:
+                    continue
+                case _:
+                    return False
+        return True
+
+    def _connect_visiting(self, visiting: list[Cell]) -> None:
+        """
+        Connect all visiting cell together.
+
+        Keyword parameters:
+        visitings: list[Cell] -- Cells that search the next visited cell.
+        """
+        for index, cell in enumerate(visiting[:-1]):
+            for dir, neig in cell.get_neighbours().items():
+                if visiting[index + 1] == neig:
+                    match dir:
+                        case Compass.NORTH:
+                            cell.set_connection(Compass.NORTH)
+                        case Compass.EAST:
+                            cell.set_connection(Compass.EAST)
+                        case Compass.SOUTH:
+                            cell.set_connection(Compass.SOUTH)
+                        case Compass.WEST:
+                            cell.set_connection(Compass.WEST)
