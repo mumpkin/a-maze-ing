@@ -8,7 +8,20 @@ from utils import Point
 
 
 class Cell:
-    """Representation of a cell in the maze's grid."""
+    """Representation of a cell in the maze's grid.
+
+    Attributes
+    ----------
+    pos : Point
+        Position of the cell.
+    state : CellState
+        State of the cell
+
+    Methods
+    -------
+    get_random_neighbour
+        Return a cell in the neighbouring of the current cell.
+    """
 
     def __init__(self, pos: Point) -> None:
         self.pos: Point = pos
@@ -27,18 +40,18 @@ class Cell:
         }
 
     def _validate_neighbouring(self, cell: Self) -> Compass | None:
-        """
-        Return a Compass direction if neighbouring_cell is.
+        """Return a Compass direction if neighbouring_cell is.
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             Cell to check wheter it is a neighbour to the current cell
 
         Returns
         -------
-        If the Cell object passed in argument is a neighbour,
-        return its direction as a `Compass`, otherwise `None`
+        Compass | None
+            If the Cell object passed in argument is a neighbour,
+            return its direction as a `Compass`, otherwise `None`
         """
         diff_x = self.pos.x - cell.pos.x
         diff_y = self.pos.y - cell.pos.y
@@ -59,8 +72,9 @@ class Cell:
 
         Returns
         -------
-        A `tuple` containing the direction of the neighbour along with
-        the neighbour itself
+        tuple[Compass, Self]
+            A `tuple` containing the direction of the neighbour along with
+            the neighbour itself
         """
         neighbours: list[tuple[Compass, Self]] = [
             (c, n) for c, n in self._neighbours.items() if n is not None
@@ -73,17 +87,17 @@ class Cell:
 
         Returns
         -------
-        A `dictionnary` containing all neighbours of the current cell
+        dict[Compass, Self | None]
+            A `dictionnary` containing all neighbours of the current cell
         """
         return self._neighbours
 
     def add_neighbour(self, cell: Self) -> None:
-        """
-        Add a new valid cell as self neighbour.
+        """Add a new valid cell as self neighbour.
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             Cell to add as neighbour to the current cell
             if its position is valid.
         """
@@ -96,8 +110,10 @@ class Cell:
 
         Returns
         -------
-        A `dictionnary` containing four pairs of `Compass` : `bool`, the `bool`
-        being the opening status in the direction pointed by `Compass`
+        dict[Compass, bool]
+            A `dictionnary` containing four pairs of `Compass` : `bool`, the
+            `bool` being the opening status in the direction pointed by
+            `Compass`
         """
         return self._connections
 
@@ -106,7 +122,7 @@ class Cell:
 
         Parameters
         ----------
-        direction: `Compass`
+        direction : `Compass`
             Compass direction to set to `True`.
         """
         neighbour = self._neighbours[direction]
@@ -126,7 +142,7 @@ class Cell:
 
         Parameters
         ----------
-        direction: `Compass`
+        direction : `Compass`
             Compass direction to set to `False`.
         """
         neighbour = self._neighbours[direction]
@@ -146,8 +162,9 @@ class Cell:
 
         Returns
         -------
-        A `int` ranging from 0 to 15 depending on the connections
-        bound to the current cell
+        int
+            A integer ranging from 0 to 15 depending on the connections
+            bound to the current cell
         """
         return sum([k.value for k, v in self._connections.items() if v])
 
@@ -156,8 +173,9 @@ class Cell:
 
         Returns
         -------
-        A `str` representing a hexadecimal number depending on the connections
-        bound to the current cell
+        str
+            A string representing a hexadecimal number depending on the
+            connections bound to the current cell
         """
         decimal_value = self.conns_to_decimal()
         return hex(15 - decimal_value).removeprefix("0x").upper()

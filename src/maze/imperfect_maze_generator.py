@@ -23,6 +23,12 @@ class ImperfectMazeGenerator(MazeGenerator):
         ----------
         cell : `Cell`
             The cell we want to check for being the center of a 3x3 open space.
+
+        Methods
+        -------
+        generate
+            Generate an imperfect maze.
+
         """
         n_neighbour = cell.get_neighbours()[Compass.NORTH]
         e_neighbour = cell.get_neighbours()[Compass.EAST]
