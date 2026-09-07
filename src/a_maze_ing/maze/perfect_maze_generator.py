@@ -6,19 +6,19 @@ from sys import stdout
 from time import sleep
 from typing import override
 
-import globals
-import utils
-from enums import CellState, Compass
-from maze import Cell
-
-from . import MazeGenerator
+from ..enums.cell_state import CellState
+from ..enums.compass import Compass
+from ..globals.config import config
+from ..maze.cell import Cell
+from ..utils import render
+from .maze_generator import MazeGenerator
 
 
 class PerfectMazeGenerator(MazeGenerator):
     """Perfect maze generator."""
 
     @override
-    def generate(self, engine: utils.RenderEngine | None = None) -> None:
+    def generate(self, engine: render.RenderEngine | None = None) -> None:
         """Generate an perfect maze.
 
         The generation follows a inspired logic from the
@@ -30,13 +30,13 @@ class PerfectMazeGenerator(MazeGenerator):
             Passing this argument into the program allows to render the maze
             step-by-step
         """
-        random.seed(globals.config.seed) if globals.config.seed else None
+        random.seed(config.seed) if config.seed else None
         _ = subprocess.run(["clear"])
         visiting: list[Cell] = [
-            cell for cell in self.grid if cell.pos == globals.config.entry
+            cell for cell in self.grid if cell.pos == config.entry
         ]
         for cell in self.grid:
-            if cell.pos == globals.config.exit:
+            if cell.pos == config.exit:
                 cell.state = CellState.VISITED
                 break
         while not self._is_maze_generated():
@@ -70,7 +70,7 @@ class PerfectMazeGenerator(MazeGenerator):
                 _ = stdout.write("\033[H")
                 _ = stdout.flush()
                 engine.render()
-                sleep(globals.config.delay)
+                sleep(config.delay)
 
     def _is_maze_generated(self) -> bool:
         """Check if the maze is completely generated."""

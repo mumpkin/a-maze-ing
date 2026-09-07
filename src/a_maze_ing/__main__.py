@@ -6,7 +6,7 @@
 |__|__|   |_|_|_|__|__|_____|_____|   |_____|_|___|_____|
 """
 
-from app import App
+from . import App
 
 if __name__ == "__main__":
     """Run the app."""
