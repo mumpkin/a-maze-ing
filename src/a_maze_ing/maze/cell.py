@@ -3,8 +3,9 @@
 import random
 from typing import Self
 
-from enums import CellState, Compass
-from utils import Point
+from ..enums.cell_state import CellState
+from ..enums.compass import Compass
+from ..utils.point import Point
 
 
 class Cell:

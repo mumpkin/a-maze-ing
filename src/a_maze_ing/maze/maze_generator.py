@@ -2,11 +2,10 @@
 
 from abc import ABC, abstractmethod
 
-import globals
-import utils
-from enums import CellState
-from utils import Point
-
+from ..enums.cell_state import CellState
+from ..globals.config import config
+from ..utils import render
+from ..utils.point import Point
 from .cell import Cell
 
 
@@ -45,8 +44,8 @@ class MazeGenerator(ABC):
     def save(self) -> None:
         """Save the maze information in an output file."""
         try:
-            with open(globals.config.output_file, "w") as file:
-                for i in range(globals.config.height):
+            with open(config.output_file, "w") as file:
+                for i in range(config.height):
                     line: list[Cell] = sorted(
                         [cell for cell in self.grid if cell.pos.y == i],
                         key=lambda cell: cell.pos.x,
@@ -59,7 +58,7 @@ class MazeGenerator(ABC):
             print(fe)
 
     @abstractmethod
-    def generate(self, engine: utils.RenderEngine | None = None) -> None:
+    def generate(self, engine: render.RenderEngine | None = None) -> None:
         """Generate a maze.
 
         The generation follows a inspired logic from the
@@ -74,12 +73,12 @@ class MazeGenerator(ABC):
         pass
 
     def _instanciate_cells(self) -> None:
-        for i in range(globals.config.width * globals.config.height):
+        for i in range(config.width * config.height):
             self.grid.append(
                 Cell(
                     Point(
-                        x=i % globals.config.width,
-                        y=i // globals.config.width,
+                        x=i % config.width,
+                        y=i // config.width,
                     )
                 )
             )
@@ -90,10 +89,8 @@ class MazeGenerator(ABC):
                 cell.add_neighbour(neighbour)
 
     def _ft_lock(self) -> None:
-        if globals.config.width >= 9 and globals.config.height >= 7:
-            center: Point = Point(
-                x=globals.config.width // 2, y=globals.config.height // 2
-            )
+        if config.width >= 9 and config.height >= 7:
+            center: Point = Point(x=config.width // 2, y=config.height // 2)
             ft_pos = [
                 *[Point(x=-3, y=a) for a in range(-2, 1)],
                 Point(x=-2, y=0),

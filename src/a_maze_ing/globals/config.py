@@ -1,6 +1,5 @@
 """Load and validate the global config."""
 
-import json
 import os
 import sys
 from typing import Self
@@ -12,8 +11,8 @@ from pydantic import (
     model_validator,
 )
 
-from enums import ConfigKey
-from utils import Point
+from ..enums.config_keys import ConfigKey
+from ..utils.point import Point
 
 
 class Config(BaseModel):

@@ -14,7 +14,7 @@ $(VENV):
 
 run: $(VENV)
 	. ./$(VENV)/bin/activate
-	$(PM) run $(PY) src/a_maze_ing.py $(CONFIG)
+	$(PM) run $(PY) -m a_maze_ing $(CONFIG)
 
 clean:
 	rm -rf $(VENV)
@@ -40,6 +40,6 @@ lint-strict: $(VENV)
 
 debug: $(VENV)
 	. ./$(VENV)/bin/activate
-	$(PM) run $(PY) -m pdb src/a_maze_ing.py
+	$(PM) run $(PY) -m pdb src/a_maze_ing/__main__.py
 
 .PHONY: install all run clean debug lint lint-strict

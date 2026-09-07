@@ -5,12 +5,13 @@ from sys import stdout
 from time import sleep
 from typing import override
 
-import globals
-from enums import CellState, Compass
-from utils import Point, RenderEngine
-
-from . import MazeGenerator
-from .cell import Cell
+from ..enums.cell_state import CellState
+from ..enums.compass import Compass
+from ..globals.config import config
+from ..maze.cell import Cell
+from ..maze.maze_generator import MazeGenerator
+from ..utils.point import Point
+from ..utils.render import RenderEngine
 
 
 class ImperfectMazeGenerator(MazeGenerator):
@@ -300,7 +301,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             _ = stdout.write("\033[H")
             _ = stdout.flush()
             engine.render()
-            sleep(globals.config.delay)
+            sleep(config.delay)
 
     def _horizontal_split(
         self,
@@ -331,7 +332,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             + random.randint(
                 area_corners["top-left"].y + 1, area_corners["bottom-left"].y
             )
-            * globals.config.width
+            * config.width
         ]
         next_cell: Cell | None = starting_cell
         direction_to_unset = Compass.NORTH
@@ -340,8 +341,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         while next_cell and next_cell.pos.x <= area_corners["top-right"].x:
             if not (
-                next_cell.pos == globals.config.entry
-                or next_cell.pos == globals.config.exit
+                next_cell.pos == config.entry or next_cell.pos == config.exit
             ):
                 if next_cell.state == CellState.VISITED:
                     segment_cells.append(next_cell)
@@ -393,7 +393,7 @@ class ImperfectMazeGenerator(MazeGenerator):
             return
         starting_cell: Cell = self.grid[
             random.randint(area["top-left"].x + 1, area["top-right"].x - 1)
-            + area["top-left"].y * globals.config.width
+            + area["top-left"].y * config.width
         ]
         next_cell: Cell | None = starting_cell
         direction_to_unset: Compass = Compass.EAST
@@ -402,8 +402,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         while next_cell and next_cell.pos.y <= area["bottom-left"].y:
             if not (
-                next_cell.pos == globals.config.entry
-                or next_cell.pos == globals.config.exit
+                next_cell.pos == config.entry or next_cell.pos == config.exit
             ):
                 east_neighbour = next_cell.get_neighbours()[Compass.EAST]
                 if next_cell.state == CellState.VISITED and not (
@@ -468,11 +467,9 @@ class ImperfectMazeGenerator(MazeGenerator):
         corners = dict(
             {
                 "top-left": Point(x=0, y=0),
-                "top-right": Point(x=globals.config.width - 1, y=0),
-                "bottom-left": Point(x=0, y=globals.config.height - 1),
-                "bottom-right": Point(
-                    x=globals.config.width - 1, y=globals.config.height - 1
-                ),
+                "top-right": Point(x=config.width - 1, y=0),
+                "bottom-left": Point(x=0, y=config.height - 1),
+                "bottom-right": Point(x=config.width - 1, y=config.height - 1),
             }
         )
         self._dispatch_logical_split(corners, engine)
@@ -497,8 +494,8 @@ class ImperfectMazeGenerator(MazeGenerator):
                 cell.set_connection(Compass.EAST)
                 cell.set_connection(Compass.SOUTH)
                 cell.set_connection(Compass.WEST)
-        if globals.config.seed is not None:
-            random.seed(globals.config.seed)
+        if config.seed is not None:
+            random.seed(config.seed)
         self._imperfect_generation(engine=engine)
         self._eliminate_deadends(engine=engine)
         self._anihilate_large_rooms()

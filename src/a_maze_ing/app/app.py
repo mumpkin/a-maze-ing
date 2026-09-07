@@ -5,11 +5,12 @@ import subprocess
 import sys
 from enum import Enum, auto
 
-import globals
-from enums import ColorScheme, FiredColorScheme, IcedColorScheme
-from maze import MazeGenerator, PerfectMazeGenerator
-from maze.imperfect_maze_generator import ImperfectMazeGenerator
-from utils import RenderEngine
+from ..enums.color_scheme import ColorScheme, FiredColorScheme, IcedColorScheme
+from ..globals.config import config
+from ..maze.imperfect_maze_generator import ImperfectMazeGenerator
+from ..maze.maze_generator import MazeGenerator
+from ..maze.perfect_maze_generator import PerfectMazeGenerator
+from ..utils.render import RenderEngine
 
 
 class AppState(Enum):
@@ -23,13 +24,21 @@ class AppState(Enum):
 
 
 class App:
-    """App definition."""
+    """App definition.
+
+    Attributes
+    ----------
+    state : AppState, default=AppState.TitleScreen
+        State of the app, screen currently displayed.
+    generator : MazeGenerator
+        Generator instance, its type depends on `config.perfect`.
+    """
 
     def __init__(self) -> None:
         self.state: AppState = AppState.TitleScreen
         self.generator: MazeGenerator = (
             PerfectMazeGenerator()
-            if globals.config.perfect
+            if config.perfect
             else ImperfectMazeGenerator()
         )
         self.schemes_index: int = 0
@@ -42,7 +51,7 @@ class App:
             self.schemes_index
         ]
         self.engine: RenderEngine = RenderEngine(self.generator)
-        self.engine.set_color_scheme(self.selected_colors)
+        self.engine.color_scheme = self.selected_colors
 
     def run(self) -> None:
         """Run the app."""
@@ -60,14 +69,12 @@ class App:
                     self._color_scheme_screen()
 
     def _title_screen(self) -> None:
-        """Render the title screen."""
         _ = subprocess.run("clear")
         print("\033[?25l", end="")
         self._print_title_menu()
         self._route_title_action(self._get_user_input())
 
     def _print_title_menu(self) -> None:
-        """Print the menu of title screen."""
         term_width, term_height = os.get_terminal_size()
         heading: list[str] = [
             "\033[1m",
@@ -96,12 +103,6 @@ class App:
             print(line.center(term_width))
 
     def _route_title_action(self, action: str) -> None:
-        """
-        Route the app state from title screen.
-
-        Keyword parameters:
-        action: str -- Code of the user action.
-        """
         match action.lower():
             case "s":
                 _ = subprocess.run("clear")
@@ -122,14 +123,12 @@ class App:
                 pass
 
     def _config_screen(self) -> None:
-        """Render the config screen."""
         _ = subprocess.run("clear")
         print("\033[?25l", end="")
         self._print_config()
         self._route_config_action(self._get_user_input())
 
     def _print_config(self) -> None:
-        """Print config menu."""
         term_width, term_height = os.get_terminal_size()
         heading: list[str] = [
             "\033[1m",
@@ -143,14 +142,14 @@ class App:
             "\033[0m",
         ]
         configs: list[str] = [
-            f"- WIDTH: {globals.config.width}",
-            f"- HEIGHT: {globals.config.height}",
-            f"- ENTRY: {globals.config.entry.__dict__}",
-            f"- EXIT: {globals.config.exit.__dict__}",
-            f"- PERFECT: {globals.config.perfect}",
-            f"- SEED: {globals.config.seed}",
-            f"- DELAY: {globals.config.delay}",
-            f"- OUTPUT FILE: {globals.config.output_file}",
+            f"- WIDTH: {config.width}",
+            f"- HEIGHT: {config.height}",
+            f"- ENTRY: {config.entry.__dict__}",
+            f"- EXIT: {config.exit.__dict__}",
+            f"- PERFECT: {config.perfect}",
+            f"- SEED: {config.seed}",
+            f"- DELAY: {config.delay}",
+            f"- OUTPUT FILE: {config.output_file}",
             f"- CONGIF FILE: {sys.argv[1]}",
         ]
         option_width: int = len(max(configs, key=len))
@@ -167,12 +166,6 @@ class App:
         print("t: title screen - q: quit".center(term_width))
 
     def _route_config_action(self, action: str) -> None:
-        """
-        Route the app state from config screen.
-
-        Keyword parameters:
-        action: str -- Code of the user action.
-        """
         match action.lower():
             case "t":
                 _ = subprocess.run("clear")
@@ -184,7 +177,6 @@ class App:
                 pass
 
     def _maze_screen(self) -> None:
-        """Render the maze screen."""
         _ = subprocess.run("clear")
         self.generator.init_maze()
         _ = subprocess.run("clear")
@@ -194,7 +186,6 @@ class App:
         self._route_maze_action(self._get_user_input())
 
     def _vizualise_maze_screen(self) -> None:
-        """Render the maze screen in vizualisation mode."""
         _ = subprocess.run("clear")
         self.generator.init_maze()
         _ = subprocess.run("clear")
@@ -205,12 +196,6 @@ class App:
         self._route_maze_action(self._get_user_input())
 
     def _route_maze_action(self, action: str) -> None:
-        """
-        Route the app state from maze screens.
-
-        Keyword parameters:
-        action: str -- Code of the user action.
-        """
         match action.lower():
             case "r":
                 _ = subprocess.run("clear")
@@ -225,14 +210,12 @@ class App:
                 pass
 
     def _color_scheme_screen(self) -> None:
-        """Render the color schemes select screen."""
         _ = subprocess.run("clear")
         print("\033[?25l", end="")
         self._print_color_scheme()
         self._route_color_scheme_action(self._get_user_input())
 
     def _print_color_scheme(self) -> None:
-        """Print color scheme selection menu."""
         term_width, term_height = os.get_terminal_size()
         bg = self.selected_colors.VISITING
         heading: list[str] = [
@@ -263,12 +246,12 @@ class App:
         for line in heading:
             if (
                 line == self.selected_colors.name
-                and line == self.engine.get_color_scheme().name
+                and line == self.engine.color_scheme.name
             ):
                 print(f"> [{line}] <".center(term_width))
             elif line == self.selected_colors.name:
                 print(f"> {line} <".center(term_width))
-            elif line == self.engine.get_color_scheme().name:
+            elif line == self.engine.color_scheme.name:
                 print(f"[ {line} ]".center(term_width))
             elif line == f"\033[1m{bg}" or line == "\033[0m" or line == bg:
                 print(line)
@@ -276,12 +259,6 @@ class App:
                 print(line.center(term_width))
 
     def _route_color_scheme_action(self, action: str) -> None:
-        """
-        Route the app state from color scheme screen.
-
-        Keyword parameters:
-        action: str -- Code of the user action.
-        """
         match action:
             case "j":
                 self.schemes_index += 1
@@ -294,7 +271,7 @@ class App:
                     self.schemes_index = len(self.color_schemes) - 1
                 self.selected_colors = self.color_schemes[self.schemes_index]
             case "\n":
-                self.engine.set_color_scheme(self.selected_colors)
+                self.engine.color_scheme = self.selected_colors
             case "t":
                 self.state = AppState.TitleScreen
             case "q":
@@ -304,13 +281,6 @@ class App:
                 pass
 
     def _wait_term_size(self, width: int, height: int) -> None:
-        """
-        Wait the terminal to be large enough.
-
-        Keyword parameters:
-        width: int -- Expected terminal width.
-        height: int -- Expected terminal height.
-        """
         term_width, term_height = os.get_terminal_size()
         while width >= term_width or height >= term_height:
             _ = subprocess.run("clear")
@@ -333,7 +303,6 @@ class App:
         _ = subprocess.run("clear")
 
     def _get_user_input(self) -> str:
-        """Get the user input for menus actions."""
         import sys
         import termios
 
