@@ -19,7 +19,7 @@ class PerfectMazeGenerator(MazeGenerator):
 
     @override
     def generate(self, engine: utils.RenderEngine | None = None) -> None:
-        """Generate an imperfect maze.
+        """Generate an perfect maze.
 
         The generation follows a inspired logic from the
         recursive division algorithm.

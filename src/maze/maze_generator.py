@@ -60,13 +60,16 @@ class MazeGenerator(ABC):
 
     @abstractmethod
     def generate(self, engine: utils.RenderEngine | None = None) -> None:
-        """Generate the maze's grid by making connections between cells.
+        """Generate a maze.
+
+        The generation follows a inspired logic from the
+        recursive division algorithm.
 
         Parameters
         ----------
-        engine : RenderEngine, default=None
-            Engine instance used to render the maze's grid at each generation
-            steps.
+        engine : `RenderEngine`
+            Passing this argument into the program allows to render the maze
+            step-by-step
         """
         pass
 
