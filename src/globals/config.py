@@ -17,7 +17,25 @@ from utils import Point
 
 
 class Config(BaseModel):
-    """Config representation."""
+    """Config representation.
+
+    Attributes
+    ----------
+    width : int
+        Width of the maze.
+    height : int
+        Height of the maze.
+    entry : Point
+        Position of the maze's entry point.
+    exit : Point
+        Position of the maze's exit point.
+    output_file : str
+        Name|Path of the save file.
+    perfect : bool
+        Is the maze perfect ? Only God knows, so you are God.
+    seed : int
+        Seed of the forbiden fruit, God not happy.
+    """
 
     width: int = Field(gt=0)
     height: int = Field(gt=0)
@@ -28,24 +46,8 @@ class Config(BaseModel):
     seed: int | None = Field(default=None)
     delay: float = Field(gt=0)
 
-    def toJSON(self) -> str:
-        """Return the json representation of Config."""
-        return json.dumps(
-            {
-                "width": self.width,
-                "height": self.height,
-                "entry": self.entry.__dict__,
-                "exit": self.exit.__dict__,
-                "output_file": self.output_file,
-                "perfect": self.perfect,
-                "seed": self.seed,
-            },
-            indent=4,
-        )
-
     @staticmethod
-    def get_env() -> dict[ConfigKey, str]:
-        """Return the environment variables."""
+    def _get_env() -> dict[ConfigKey, str]:
         vars: dict[ConfigKey, str] = {}
         missing_vars: list[str] = []
 
@@ -92,16 +94,10 @@ class Config(BaseModel):
         return self
 
     @classmethod
-    def load_config(cls, path: str) -> Self:
-        """
-        Return the instance of config.
-
-        Keyword Argument:
-        path: str -- Path to the config file.
-        """
+    def _load_config(cls, path: str) -> Self:
         try:
             _ = dotenv.load_dotenv(path)
-            env = Config.get_env()
+            env = Config._get_env()
 
             config = cls(
                 width=int(env[ConfigKey.WIDTH]),
@@ -127,4 +123,4 @@ class Config(BaseModel):
             sys.exit(1)
 
 
-config: Config = Config.load_config(sys.argv[1])
+config: Config = Config._load_config(sys.argv[1])
