@@ -21,7 +21,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             The cell we want to check for being the center of a 3x3 open space.
         """
         n_neighbour = cell.get_neighbours()[Compass.NORTH]
@@ -58,7 +58,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             The cell we want to check for being a dead end.
         """
         match cell.conns_to_decimal():
@@ -80,7 +80,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             The cell whose neighbours we want to check the states.
         """
         neighbours = cell.get_neighbours()
@@ -98,9 +98,9 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        cell: `Cell`
+        cell : `Cell`
             A cell from the grid presenting a dead end.
-        closed_directions: `list[Compass]`
+        closed_directions : `list[Compass]`
             A list containing the possibly valid directions towards neighbours
             of the current cell to create a new path
         """
@@ -138,7 +138,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -201,9 +201,9 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        original_area: `dict[str, Point]`
+        original_area : `dict[str, Point]`
             The area that is split into two parts by a horizontal line
-        starting_cell: `Cell`
+        starting_cell : `Cell`
             The cell from wich we began splitting the previous area
         """
         upper_area: dict[str, Point] = dict(
@@ -249,9 +249,9 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        original_area: `dict[str, Point]`
+        original_area : `dict[str, Point]`
             The area that is split into two parts by a vertical line
-        starting_cell: `Cell`
+        starting_cell : `Cell`
             The cell from wich we began splitting the previous area
         """
         left_area: dict[str, Point] = dict(
@@ -286,7 +286,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -306,12 +306,12 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        area: `dict[str, Point]`
+        area : `dict[str, Point]`
             The area delimited by four coordinates from wich to create the
             next section
-        direction: `Compass`
+        direction : `Compass`
             Direction in wich the maze will be built
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -371,12 +371,12 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        area: `dict[str, Point]`
+        area : `dict[str, Point]`
             The area delimited by four coordinates from wich to create the
             next section
-        direction: `Compass`
+        direction : `Compass`
             Direction in wich the maze will be built
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -436,10 +436,10 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        area: `dict[str, Point]`
+        area : `dict[str, Point]`
             The area delimited by four coordinates from wich to create the
             next section
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -455,7 +455,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
@@ -480,7 +480,7 @@ class ImperfectMazeGenerator(MazeGenerator):
 
         Parameters
         ----------
-        engine: `RenderEngine`
+        engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
             step-by-step
         """
