@@ -193,7 +193,6 @@ class App:
         _ = subprocess.run("clear")
         self.engine.render()
         print("r: re-generate - s: save - t: title screen - q: quit")
-<<<<<<< HEAD
         self._route_maze_action()
 
     def _route_maze_action(self) -> None:
@@ -221,26 +220,6 @@ class App:
                     if action == "\n":
                         action = "newline"
                     print(f"\rInvalid input: '{action}'\033[K", end="\r")
-=======
-        self._route_maze_action(self._get_user_input())
-
-    def _route_maze_action(self, action: str) -> None:
-        match action.lower():
-            case "r":
-                _ = subprocess.run("clear")
-                self.state = self.state
-            case "s":
-                _ = subprocess.run("clear")
-                self.generator.save()
-            case "t":
-                _ = subprocess.run("clear")
-                self.state = AppState.TitleScreen
-            case "q":
-                _ = subprocess.run("clear")
-                exit(0)
-            case _:
-                pass
->>>>>>> 844e347 (wip])
 
     def _color_scheme_screen(self) -> None:
         _ = subprocess.run("clear")
