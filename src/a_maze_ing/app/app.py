@@ -204,7 +204,11 @@ class App:
                     self.state = self.state
                     break
                 case "s":
-                    break
+                    self.generator.save()
+                    print(
+                        f"\rSaved grid to: {config.output_file}\033[K",
+                        end="\r",
+                    )
                 case "t":
                     _ = subprocess.run("clear")
                     self.state = AppState.TitleScreen
@@ -215,7 +219,7 @@ class App:
                 case _:
                     if action == "\n":
                         action = "newline"
-                    print(f"\033[FInvalid input: '{action}'\033[K", end="\r")
+                    print(f"\rInvalid input: '{action}'\033[K", end="\r")
 
     def _color_scheme_screen(self) -> None:
         _ = subprocess.run("clear")
