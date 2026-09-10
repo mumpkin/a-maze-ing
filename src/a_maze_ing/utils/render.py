@@ -78,6 +78,11 @@ class RenderEngine:
             for cell in row:
                 north_neighbour = cell.get_neighbours().get(Compass.NORTH)
                 if (
+                    cell in self.maze.optimal_path
+                    and north_neighbour in self.maze.optimal_path
+                ) and cell.get_connections()[Compass.NORTH]:
+                    self._draw_tile(self._get_tile_color(cell))
+                elif (
                     cell.state == CellState.LOCKED
                     and north_neighbour
                     and north_neighbour.state == CellState.LOCKED
@@ -97,6 +102,11 @@ class RenderEngine:
                 ):
                     if cell.pos == config.entry or cell.pos == config.exit:
                         self._draw_tile(self.color_scheme.VISITED)
+                    elif (
+                        cell in self.maze.optimal_path
+                        and north_neighbour not in self.maze.optimal_path
+                    ):
+                        self._draw_tile(self.color_scheme.VISITED)
                     else:
                         self._draw_tile(self._get_tile_color(cell))
 
@@ -115,6 +125,11 @@ class RenderEngine:
             east_neighbour = cell.get_neighbours().get(Compass.EAST)
             self._draw_tile(self._get_tile_color(cell))
             if (
+                cell in self.maze.optimal_path
+                and east_neighbour in self.maze.optimal_path
+            ) and cell.get_connections()[Compass.EAST]:
+                self._draw_tile(self._get_tile_color(cell))
+            elif (
                 cell.state == CellState.LOCKED
                 and east_neighbour
                 and east_neighbour.state == CellState.LOCKED
@@ -133,6 +148,11 @@ class RenderEngine:
                 and cell.get_connections()[Compass.EAST]
             ):
                 if cell.pos == config.entry or cell.pos == config.exit:
+                    self._draw_tile(self.color_scheme.VISITED)
+                elif (
+                    cell in self.maze.optimal_path
+                    and east_neighbour not in self.maze.optimal_path
+                ):
                     self._draw_tile(self.color_scheme.VISITED)
                 else:
                     self._draw_tile(self._get_tile_color(cell))
