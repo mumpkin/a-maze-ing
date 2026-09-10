@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 
 from ..enums.cell_state import CellState
+from ..enums.compass import Compass
 from ..globals.config import config
 from ..utils import render
 from ..utils.point import Point
@@ -37,6 +38,7 @@ class MazeGenerator(ABC):
     def init_maze(self) -> None:
         """Initialize default maze to prepare generation."""
         self.grid = []
+        self.optimal_path = []
         self._instanciate_cells()
         self._define_neighbourhood()
         self._ft_lock()
@@ -54,8 +56,33 @@ class MazeGenerator(ABC):
                         "".join([cell.conns_to_hexa() for cell in line]),
                         file=file,
                     )
+
+                print(file=file)
+                print(f"{config.entry.x},{config.entry.y}", file=file)
+                print(f"{config.exit.x},{config.exit.y}", file=file)
+                print(self._get_optimal_as_cardinal(), file=file)
+
         except Exception as fe:
             print(fe)
+
+    def _get_optimal_as_cardinal(self) -> str:
+        result: list[str] = []
+        current_cell: Cell = self.optimal_path.pop(0)
+
+        while len(self.optimal_path) != 0:
+            for compass, cell in current_cell.get_neighbours().items():
+                if cell in self.optimal_path:
+                    match compass:
+                        case Compass.NORTH:
+                            result.append("N")
+                        case Compass.EAST:
+                            result.append("E")
+                        case Compass.SOUTH:
+                            result.append("S")
+                        case Compass.WEST:
+                            result.append("W")
+                    current_cell = self.optimal_path.pop(0)
+        return "".join(result)
 
     @abstractmethod
     def generate(self, engine: render.RenderEngine | None = None) -> None:
