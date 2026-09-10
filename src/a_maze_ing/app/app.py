@@ -182,8 +182,8 @@ class App:
         _ = subprocess.run("clear")
         self.generator.generate()
         self.engine.render()
-        print("r: re-generate - t: title screen - q: quit")
-        self._route_maze_action(self._get_user_input())
+        print("r: re-generate - s: save - t: title screen - q: quit")
+        self._route_maze_action()
 
     def _vizualise_maze_screen(self) -> None:
         _ = subprocess.run("clear")
@@ -192,22 +192,30 @@ class App:
         self.generator.generate(self.engine)
         _ = subprocess.run("clear")
         self.engine.render()
-        print("r: re-generate - t: title screen - q: quit")
-        self._route_maze_action(self._get_user_input())
+        print("r: re-generate - s: save - t: title screen - q: quit")
+        self._route_maze_action()
 
-    def _route_maze_action(self, action: str) -> None:
-        match action.lower():
-            case "r":
-                _ = subprocess.run("clear")
-                self.state = self.state
-            case "t":
-                _ = subprocess.run("clear")
-                self.state = AppState.TitleScreen
-            case "q":
-                _ = subprocess.run("clear")
-                exit(0)
-            case _:
-                pass
+    def _route_maze_action(self) -> None:
+        while True:
+            action = self._get_user_input()
+            match action.lower():
+                case "r":
+                    _ = subprocess.run("clear")
+                    self.state = self.state
+                    break
+                case "s":
+                    break
+                case "t":
+                    _ = subprocess.run("clear")
+                    self.state = AppState.TitleScreen
+                    break
+                case "q":
+                    _ = subprocess.run("clear")
+                    exit(0)
+                case _:
+                    if action == "\n":
+                        action = "newline"
+                    print(f"\033[FInvalid input: '{action}'\033[K", end="\r")
 
     def _color_scheme_screen(self) -> None:
         _ = subprocess.run("clear")
