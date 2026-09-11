@@ -31,6 +31,7 @@ class RenderEngine:
         """Render default constructor."""
         self.maze = maze_generator
         self.color_scheme: ColorScheme = ColorScheme()
+        self.opti_toggle: bool = False
 
     def render(self) -> None:
         """Render the maze in the terminal."""
@@ -48,7 +49,7 @@ class RenderEngine:
             case config.exit:
                 return self.color_scheme.EXIT
             case _:
-                if cell in self.maze.optimal_path:
+                if cell in self.maze.optimal_path and self.opti_toggle:
                     return self.color_scheme.OPTIMAL_PATH
                 else:
                     match cell.state:
@@ -77,9 +78,13 @@ class RenderEngine:
             for cell in row:
                 north_neighbour = cell.get_neighbours().get(Compass.NORTH)
                 if (
-                    cell in self.maze.optimal_path
-                    and north_neighbour in self.maze.optimal_path
-                ) and cell.get_connections()[Compass.NORTH]:
+                    (
+                        cell in self.maze.optimal_path
+                        and north_neighbour in self.maze.optimal_path
+                    )
+                    and cell.get_connections()[Compass.NORTH]
+                    and self.opti_toggle
+                ):
                     self._draw_tile(self.color_scheme.OPTIMAL_PATH)
                 elif (
                     cell.state == CellState.LOCKED
@@ -104,6 +109,7 @@ class RenderEngine:
                     elif (
                         cell in self.maze.optimal_path
                         and north_neighbour not in self.maze.optimal_path
+                        and self.opti_toggle
                     ):
                         self._draw_tile(self.color_scheme.VISITED)
                     else:
@@ -124,9 +130,13 @@ class RenderEngine:
             east_neighbour = cell.get_neighbours().get(Compass.EAST)
             self._draw_tile(self._get_tile_color(cell))
             if (
-                cell in self.maze.optimal_path
-                and east_neighbour in self.maze.optimal_path
-            ) and cell.get_connections()[Compass.EAST]:
+                (
+                    cell in self.maze.optimal_path
+                    and east_neighbour in self.maze.optimal_path
+                )
+                and cell.get_connections()[Compass.EAST]
+                and self.opti_toggle
+            ):
                 self._draw_tile(self.color_scheme.OPTIMAL_PATH)
             elif (
                 cell.state == CellState.LOCKED
@@ -151,6 +161,7 @@ class RenderEngine:
                 elif (
                     cell in self.maze.optimal_path
                     and east_neighbour not in self.maze.optimal_path
+                    and self.opti_toggle
                 ):
                     self._draw_tile(self.color_scheme.VISITED)
                 else:

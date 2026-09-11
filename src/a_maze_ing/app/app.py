@@ -183,7 +183,13 @@ class App:
         self.generator.generate()
         self.generator.compute_optimal_path()
         self.engine.render()
-        print("r: re-generate - s: save - t: title screen - q: quit")
+        print(
+            "r: re-generate{} - s: save - t: title screen - q: quit".format(
+                " - h: hide optimal path"
+                if self.engine.opti_toggle
+                else " - h: show optimal path"
+            )
+        )
         self._route_maze_action()
 
     def _vizualise_maze_screen(self) -> None:
@@ -195,7 +201,13 @@ class App:
         self.generator.compute_optimal_path(self.engine)
         _ = subprocess.run("clear")
         self.engine.render()
-        print("r: re-generate - s: save - t: title screen - q: quit")
+        print(
+            "r: re-generate{} - s: save - t: title screen - q: quit".format(
+                " - h: hide optimal path"
+                if self.engine.opti_toggle
+                else " - h: show optimal path"
+            )
+        )
         self._route_maze_action()
 
     def _route_maze_action(self) -> None:
@@ -206,6 +218,18 @@ class App:
                     _ = subprocess.run("clear")
                     self.state = self.state
                     break
+                case "h":
+                    _ = subprocess.run("clear")
+                    self.engine.opti_toggle = not self.engine.opti_toggle
+                    self.engine.render()
+                    print(
+                        "r: re-generate",
+                        "- h: hide optimal path"
+                        if self.engine.opti_toggle
+                        else "- h: show optimal path",
+                        "- s: save - t: title screen - q: quit",
+                    )
+
                 case "s":
                     self.generator.save()
                     print(
