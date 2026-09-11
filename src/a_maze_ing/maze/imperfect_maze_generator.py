@@ -499,4 +499,3 @@ class ImperfectMazeGenerator(MazeGenerator):
         self._imperfect_generation(engine=engine)
         self._eliminate_deadends(engine=engine)
         self._anihilate_large_rooms()
-        # self.compute_optimal_path(engine=engine)
