@@ -37,7 +37,7 @@ class Point:
         """Return the `Point` instance with attributes set to 0."""
         return cls(0, 0)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Allow Point to be returned as a str for display purposes."""
         return f"[x={self.x},y={self.y}]"
 
