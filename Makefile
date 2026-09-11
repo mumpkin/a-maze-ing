@@ -20,6 +20,7 @@ clean:
 	rm -rf $(VENV)
 	rm -rf **/*/__pycache__/
 	rm -rf .*_cache
+	rm -rf dist/
 
 lint: $(VENV)
 	. ./$(VENV)/bin/activate
