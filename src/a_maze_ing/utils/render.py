@@ -60,7 +60,6 @@ class RenderEngine:
                             return self.color_scheme.VISITED
                         case CellState.VISITING:
                             return self.color_scheme.VISITING
-        return self.color_scheme.VISITED
 
     def _draw_tile(self, color: str | None = None) -> None:
         tile: str = "  "
@@ -155,7 +154,10 @@ class RenderEngine:
                 ):
                     self._draw_tile(self.color_scheme.VISITED)
                 else:
-                    self._draw_tile(self._get_tile_color(cell))
+                    if east_neighbour.state == CellState.VISITING:
+                        self._draw_tile(self.color_scheme.VISITING)
+                    else:
+                        self._draw_tile(self._get_tile_color(cell))
 
             else:
                 self._draw_tile()
