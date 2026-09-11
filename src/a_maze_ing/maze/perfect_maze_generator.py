@@ -63,8 +63,6 @@ class PerfectMazeGenerator(MazeGenerator):
             elif next_cell.state == CellState.VISITED:
                 visiting.append(next_cell)
                 self._connect_visiting(visiting)
-                if len(self.optimal_path) == 0:
-                    self.optimal_path = visiting
                 for cell in visiting:
                     cell.state = CellState.VISITED
                     visiting = []
