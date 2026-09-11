@@ -81,7 +81,7 @@ class RenderEngine:
                     cell in self.maze.optimal_path
                     and north_neighbour in self.maze.optimal_path
                 ) and cell.get_connections()[Compass.NORTH]:
-                    self._draw_tile(self._get_tile_color(cell))
+                    self._draw_tile(self.color_scheme.OPTIMAL_PATH)
                 elif (
                     cell.state == CellState.LOCKED
                     and north_neighbour
@@ -128,7 +128,7 @@ class RenderEngine:
                 cell in self.maze.optimal_path
                 and east_neighbour in self.maze.optimal_path
             ) and cell.get_connections()[Compass.EAST]:
-                self._draw_tile(self._get_tile_color(cell))
+                self._draw_tile(self.color_scheme.OPTIMAL_PATH)
             elif (
                 cell.state == CellState.LOCKED
                 and east_neighbour
