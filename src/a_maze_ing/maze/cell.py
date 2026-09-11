@@ -1,7 +1,7 @@
 """Cell definition."""
 
 import random
-from typing import Self
+from typing import Self, override
 
 from ..enums.cell_state import CellState
 from ..enums.compass import Compass

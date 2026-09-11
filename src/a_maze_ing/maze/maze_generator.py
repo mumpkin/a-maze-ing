@@ -1,6 +1,8 @@
 """MazeGenerator definition."""
 
 from abc import ABC, abstractmethod
+from sys import stdout
+from time import sleep
 
 from ..enums.cell_state import CellState
 from ..enums.compass import Compass
@@ -95,9 +97,63 @@ class MazeGenerator(ABC):
         ----------
         engine : `RenderEngine`
             Passing this argument into the program allows to render the maze
-            step-by-step
+            step-by-step.
         """
         pass
+
+    def compute_optimal_path(
+        self, engine: render.RenderEngine | None = None
+    ) -> None:
+        """Compute the optimal path from the grid.
+
+        Parameters
+        ----------
+        engine : RenderEngine
+            Used for step-by-step generation.
+        """
+        entry = [c for c in self.grid if c.pos == config.entry][0]
+        exit = [c for c in self.grid if c.pos == config.exit][0]
+        paths: list[list[Cell]] = [[entry]]
+        has_found_optimal_path = False
+        while not has_found_optimal_path:
+            for path in paths:
+                curr_cell = path[-1]
+                curr_cell.state = CellState.VISITING
+                possible_cells = [
+                    cell
+                    for dir, cell in curr_cell.get_neighbours().items()
+                    if cell not in path
+                    and curr_cell.get_connections()[dir]
+                    and cell
+                    and cell.state != CellState.VISITING
+                ]
+                for n in possible_cells:
+                    new_path = [*path, n]
+                    if n:
+                        n.state = CellState.VISITING
+                    paths.append(new_path)
+                    if engine is not None:
+                        _ = stdout.write("\033[H")
+                        _ = stdout.flush()
+                        engine.render()
+                        sleep(config.delay)
+            for path in paths:
+                if exit in path:
+                    self.optimal_path = self._return_optimal_path(paths)
+                    has_found_optimal_path = True
+                    break
+        self._clear_visited()
+
+    def _return_optimal_path(self, paths: list[list[Cell]]) -> list[Cell]:
+        exit = [c for c in self.grid if c.pos == config.exit][0]
+        legal_paths = [p for p in paths if exit in p]
+        legal_paths.sort(key=len)
+        return legal_paths[0][: legal_paths[0].index(exit) + 1]
+
+    def _clear_visited(self) -> None:
+        for c in self.grid:
+            if c.state == CellState.VISITING:
+                c.state = CellState.VISITED
 
     def _instanciate_cells(self) -> None:
         for i in range(config.width * config.height):
