@@ -118,8 +118,14 @@ class Config(BaseModel):
             )
             return config
         except Exception as err:
-            print(f"Config error: {err}", file=sys.stderr)
+            print(f"[CONFIG ERROR]: {err}", file=sys.stderr)
             sys.exit(1)
 
 
-config: Config = Config._load_config(sys.argv[1])
+try:
+    if len(sys.argv) < 2:
+        raise Exception("You must provide a config file as argument.")
+    config: Config = Config._load_config(sys.argv[1])
+except Exception as e:
+    print("[CONFIG ERROR]:", e, file=sys.stderr)
+    exit(1)

@@ -129,6 +129,21 @@ class MazeGenerator(ABC):
                 *[Point(x=a, y=2) for a in range(1, 4)],
             ]
             for locker in ft_pos:
+                if (
+                    locker + center == config.entry
+                    or locker + center == config.exit
+                ):
+                    raise Exception(
+                        "ENTRY and EXIT can't be equal:\n"
+                        + "\n".join(
+                            [
+                                f"- {p.x + center.x},{p.y + center.y}"
+                                for p in ft_pos
+                            ]
+                        )
+                        + f"\n inside a `W={config.width} x H={config.height}`"
+                        + " maze.",
+                    )
                 for cell in self.grid:
                     from_center = locker + center
                     if (
